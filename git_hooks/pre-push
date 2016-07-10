@@ -1,0 +1,7 @@
+#!/bin/sh
+# Copy to .git/hooks
+
+# This is not ideal, because it tests the current state of the tree,
+# not the state that is being pushed.
+# But it's simple, and hopefully a good enough approximation.
+python3 -m production.test_all --maxfail=1
