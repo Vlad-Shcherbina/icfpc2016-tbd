@@ -1,0 +1,11 @@
+[run]
+branch = True
+# http://stackoverflow.com/a/32166431/6335232
+source = production
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise NotImplementedError
+    assert False
