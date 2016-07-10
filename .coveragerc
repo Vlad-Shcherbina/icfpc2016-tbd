@@ -2,6 +2,9 @@
 branch = True
 # http://stackoverflow.com/a/32166431/6335232
 source = production
+# SWIG-generated wrapper
+omit =
+    production/examples/swig_demo/sample.py
 
 [report]
 exclude_lines =

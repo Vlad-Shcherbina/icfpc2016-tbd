@@ -1,6 +1,16 @@
 ## Setup
 
-CPython 3.5.2 (latest stable release).
+SWIG 3.0, it should be available in PATH under the name `swig`
+(symlink if necessary):
+```
+$ swig -version
+SWIG Version 3.0.8
+...
+```
+
+On Windows, Visual Studio 2015 Community or Express edition (for C++ compiler).
+
+CPython 3.5.2 (the latest stable release).
 
 Virtualenv is optional.
 
