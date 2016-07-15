@@ -1,4 +1,6 @@
 #!python3
+import faulthandler
+faulthandler.enable()
 import sys
 import pytest
 

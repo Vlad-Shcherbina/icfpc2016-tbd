@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <iostream>
+#include <assert.h>
 
 const int N = 42;
 
@@ -34,5 +35,22 @@ public:
         std::ostringstream out;
         out << "Hz(" << a << ", " << b << ")";
         return out.str();
+    }
+};
+
+
+struct Fail {
+    static void fail_assert() {
+        assert(false);
+    }
+    static void index_out_of_bounds() {
+        std::vector<int> xs(3);
+        std::cout << xs[3] << std::endl;
+    }
+    static void page_fault() {
+        *(char*)123456 = 42;
+    }
+    static void infinite_recursion() {
+        infinite_recursion();
     }
 };
