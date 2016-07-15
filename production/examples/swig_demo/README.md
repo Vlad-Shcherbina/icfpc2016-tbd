@@ -25,7 +25,7 @@ rm -f core
 ### Running the program
 
 ```bash
-python -m production.examples.swig_demo.debugging_demo fail_assert
+python3 -m production.examples.swig_demo.debugging_demo fail_assert
 ```
 
 You will get the Python part of the stacktrace right away,
@@ -66,7 +66,7 @@ For example,
 ```bash
 # enable tail call elimination
 TBD_RELEASE=yes \
-python -m production.examples.swig_demo.debugging_demo infinite_recursion
+python3 -m production.examples.swig_demo.debugging_demo infinite_recursion
 ```
 
 Hit `Ctrl-\` to kill it with `SIGQUIT`. The rest is the same.
