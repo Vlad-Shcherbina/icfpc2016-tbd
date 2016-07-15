@@ -3,9 +3,25 @@
 import os
 import sys
 import distutils.core
+import distutils.util
 
 
 def build_extension():
+    release = distutils.util.strtobool(os.getenv('TBD_RELEASE', '0'))
+    if release:
+        extra_compile_args = [
+            '-ggdb', '-std=c++11',
+            '-O2']
+        undef_macros = ['NDEBUG']  # want assertions even in the release build?
+    else:
+        extra_compile_args = [
+            '-ggdb', '-std=c++11',
+            '-O0', '-D_GLIBCXX_DEBUG', '-D_GLIBCXX_DEBUG_PEDANTIC']
+        undef_macros = ['NDEBUG']  # want assertions
+
+    # TODO: force distutils to rebuild the extension when the environment
+    # variable changes, even if the source was not touched.
+
     cur_dir = os.getcwd()
     try:
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -17,8 +33,8 @@ def build_extension():
                     ['sample.i', 'sample.cpp'],
                     depends=['sample.h', '__init__.py'],
                     swig_opts=['-c++'],
-                    extra_compile_args=['-std=c++11'],
-                    undef_macros=['NDEBUG'],  # want assertions
+                    extra_compile_args=extra_compile_args,
+                    undef_macros=undef_macros,
                 ),
             ],
             script_args=['--quiet', 'build_ext', '--inplace']
