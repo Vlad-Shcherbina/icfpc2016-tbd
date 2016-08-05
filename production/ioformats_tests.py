@@ -4,7 +4,8 @@ import textwrap
 
 from fractions import Fraction
 from production.cg import Point
-from production.ioformats import parse_problem, Problem, load_problem
+from production.ioformats import parse_problem, Problem, load_problem, \
+    Solution, solution_to_str
 
 
 def test_problem_parser():
@@ -51,8 +52,60 @@ def test_load_problem():
             (Point(x=1, y=0), Point(x=1, y=1)),
             (Point(x=0, y=1), Point(x=1, y=1)),
             ])
-    assert load_problem('1') == expected_problem 
+    assert load_problem('1') == expected_problem
 
+
+def test_solution_to_str():
+    orig_points = [
+        Point(x=0, y=0),
+        Point(x=1, y=0),
+        Point(x=1, y=1),
+        Point(x=0, y=1),
+        Point(x=0, y=Fraction(1, 2)),
+        Point(x=Fraction(1, 2), y=Fraction(1, 2)),
+        Point(x=Fraction(1, 2), y=1),
+    ]
+    facets = [
+        [0, 1, 5, 4],
+        [1, 2, 6, 5],
+        [4, 5, 3],
+        [5, 6, 3],
+    ]
+    dst_points = [
+        Point(x=0, y=0),
+        Point(x=1, y=0),
+        Point(x=0, y=0),
+        Point(x=0, y=0),
+        Point(x=0, y=Fraction(1, 2)),
+        Point(x=Fraction(1, 2), y=Fraction(1, 2)),
+        Point(x=0, y=Fraction(1, 2)),
+    ]
+    solution = Solution(
+        orig_points=orig_points,
+        facets=facets,
+        dst_points=dst_points)
+    expected_string = textwrap.dedent('''\
+    7
+    0,0
+    1,0
+    1,1
+    0,1
+    0,1/2
+    1/2,1/2
+    1/2,1
+    4
+    4 0 1 5 4
+    4 1 2 6 5
+    3 4 5 3
+    3 5 6 3
+    0,0
+    1,0
+    0,0
+    0,0
+    0,1/2
+    1/2,1/2
+    0,1/2''')
+    assert(solution_to_str(solution) == expected_string)
 
 if __name__ == '__main__':
     import sys, logging, pytest
