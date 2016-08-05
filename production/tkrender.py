@@ -67,15 +67,15 @@ def draw_problem(canvas, problem: Problem):
 
 def draw_solution(canvas, solution: Solution):
     canvas.delete(tkinter.ALL)
-
-    points = sum(solution.dst, [])
+    
+    points = list(solution.dst_points)
     points.append(Point(0, 0))
     points.append(Point(1, 1))
 
     toTk = get_canvas_coord_mapping(canvas, points)
 
     for poly in solution.facets:
-        transformed = [solution.dst[idx] for idx in poly]
+        transformed = [solution.dst_points[idx] for idx in poly]
         canvas.create_polygon(*toTk(transformed), fill='#FFD0D0', outline='')
         canvas.create_polygon(*toTk(transformed), fill='', outline='#000000', tag='skeleton')
     canvas.tag_raise('skeleton')
@@ -160,6 +160,53 @@ class ProblemBrowser(object):
 
     def run(self):
         self.root.mainloop()
+
+    def close(self):
+        if self.root:
+            self.root.destroy()
+            self.root = None
+
+
+class SolutionViewer(object):
+    '''Feed it progressively enhanced solutions in a loop:
+    
+    solution = initial
+    while sv.show_and_wait(solution):
+        new_solution = elaborate(solution)
+        if new_solution is None:
+            return solution
+    '''
+    
+    def __init__(self):
+        self.action = None
+        self.root = root = Tk()
+        root.title('Fold me baby one more time')
+        root.protocol("WM_DELETE_WINDOW", self.close)
+        
+        # exists the mainloop()
+        root.bind("<space>", lambda evt: root.quit())
+
+        root.pack_propagate(True)
+
+        self.canvas = Canvas(root, bd=1, relief=tkinter.SUNKEN, width=500, height=500)
+        self.canvas.pack(expand=True, fill=tkinter.BOTH, side=tkinter.LEFT)
+        self.canvas.bind("<Configure>", lambda evt: self.populate_canvas())
+        self.current_solution = None
+
+
+    def populate_canvas(self):
+        if self.current_solution is None:
+            return
+        draw_solution(self.canvas, self.current_solution)
+
+
+    def show_and_wait(self, solution):
+        '''Return False if user closed the window'''
+        self.current_solution = solution
+        self.populate_canvas() 
+        self.root.mainloop()
+        return self.root is not None
+
 
     def close(self):
         if self.root:
