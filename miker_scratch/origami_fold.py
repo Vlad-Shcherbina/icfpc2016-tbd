@@ -68,9 +68,15 @@ class Polygon(Polygon):
 		
 	transform = cg.AffineTransform.identity()
 		
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		if 'transform' in kwargs:
+			self.transform = kwargs['transform']
+		
 	def dissect(e_dis):
 		# apply transform to dissector line
-		e_dis = e_dis.transform(self.transform)
+		transform = self.transform
+		e_dis = e_dis.transform(transform)
 	
 		# find intersections with edges
 		ps = []
@@ -106,19 +112,25 @@ class Polygon(Polygon):
 			else:
 				es.append(e)
 		
-		return Polygon(es1), Polygon(es2)
+		return Polygon(es1, transform=transform), Polygon(es2, transform=transform)
 		
 		
 		
 def fold(polys, e_dis):
+	ret_polys = []
 	for poly in polys:
 		ret = poly.dissect(e_dis)
 		if not ret:
+			ret_polys.append(poly)
 			continue
 			
 		poly1, poly2 = ret
+		poly2.transform = poly2.transform @ cg.AffineTransform.mirror(*e_dis)
 		
+		ret_polys.append(poly1)
+		ret_polys.append(poly2)
 	
+	return ret_polys
 		
 pnts = [
 	(0, 0),
