@@ -103,12 +103,8 @@ def keep_real_facets(facets, problem):
         for silh_poly in problem.silhouette:
             a = cg.polygon_area(silh_poly)
             assert a != 0
-            if a > 0:
-                sign = 1
-            else:
-                sign = -1
-            cnt += sign * cg.count_revolutions(pt, silh_poly)
-        assert cnt in (0, 1)
+            cnt += cg.count_revolutions(pt, silh_poly)
+        assert cnt in (0, 1), cnt
         if cnt:
             result.append(facet)
 
