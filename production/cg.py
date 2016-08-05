@@ -3,10 +3,21 @@ Basic computational geometry stuff.
 """
 
 from fractions import Fraction
-from typing import NamedTuple, List, Tuple
+from typing import NamedTuple, List, Tuple, Optional
 
 
 Point = NamedTuple('Point', [('x', Fraction), ('y', Fraction)])
+class Point(Point):
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+    def cross(self, other):
+        return self.x * other.y - self.y * other.x
+    def __mul__(self, a):
+        return Point(self.x * a, self.y * a)
+    def __truediv__(self, a):
+        return self * (1 / Fraction(a))
 
 
 def polygon_area(vertices: List[Point]) -> Fraction:
@@ -85,3 +96,39 @@ def rational_angle(pt: Point) -> Fraction:
         pt = Point(pt.y, -pt.x)
 
     return pt.y / Fraction(pt.x + pt.y) + rot
+
+
+def edge_intersection(edge1, edge2) -> Optional[Point]:
+    """
+    Note: return None for parallel edges, even if they have exactly one point
+    in common.
+    """
+    pt1, pt2 = edge1
+    pt3, pt4 = edge2
+    assert pt1 != pt2
+    assert pt3 != pt4
+
+    bb_x1 = max(min(pt1.x, pt2.x), min(pt3.x, pt4.x))
+    bb_y1 = max(min(pt1.y, pt2.y), min(pt3.y, pt4.y))
+    bb_x2 = min(max(pt1.x, pt2.x), max(pt3.x, pt4.x))
+    bb_y2 = min(max(pt1.y, pt2.y), max(pt3.y, pt4.y))
+
+    if bb_x1 > bb_x2 or bb_y1 > bb_y2:
+        return None  # bounding boxes do not overlap
+
+    d1 = pt2 - pt1
+    d2 = pt4 - pt3
+
+    if d1.cross(d2) == 0:
+        return None  # edges are parallel
+
+    alpha = d1.cross(pt3 - pt1)
+    beta = d1.cross(pt4 - pt1)
+    assert alpha != beta
+
+    pt = (pt3 * beta - pt4 * alpha) / Fraction(beta - alpha)
+
+    if bb_x1 <= pt.x <= bb_x2 and bb_y1 <= pt.y <= bb_y2:
+        return pt
+    else:
+        return None

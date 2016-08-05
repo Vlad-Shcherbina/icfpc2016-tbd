@@ -5,7 +5,13 @@ from fractions import Fraction
 import pytest
 
 from production.cg import (
-    Point, polygon_area, is_point_on_edge, count_revolutions, rational_angle)
+    Point,
+    polygon_area,
+    is_point_on_edge,
+    count_revolutions,
+    rational_angle,
+    edge_intersection,
+)
 
 
 unit_square = [
@@ -72,6 +78,45 @@ def test_rational_angle():
 
     assert rational_angle(Point(1, 1)) == Fraction(1, 2)
     assert rational_angle(Point(-1, -3)) == Fraction(3, 4) + 2
+
+
+@pytest.mark.parametrize("flip1", [False, True])
+@pytest.mark.parametrize("flip2", [False, True])
+@pytest.mark.parametrize("swap", [False, True])
+def test_edge_intersections(flip1, flip2, swap):
+    def ei(edge1, edge2):
+        if flip1:
+            edge1 = edge1[::-1]
+        if flip2:
+            edge2 = edge2[::-1]
+        if swap:
+            edge1, edge2 = edge2, edge1
+        return edge_intersection(edge1, edge2)
+
+    assert ei(
+        (Point(0, 0), Point(6, 3)),
+        (Point(0, 6), Point(4, 0)),
+    ) == Point(3, Fraction(3, 2))
+
+    assert ei(
+        (Point(0, 0), Point(1, 2)),
+        (Point(1, 2), Point(3, 7)),
+    ) == Point(1, 2)
+
+    assert ei(
+        (Point(0, 0), Point(1, 0)),
+        (Point(-2, 0), Point(3, 0)),
+    ) is None
+
+    assert ei(
+        (Point(0, 0), Point(1, 0)),
+        (Point(2, 0), Point(3, 0)),
+    ) is None
+
+    assert ei(
+        (Point(0, 0), Point(4, 4)),
+        (Point(10, 0), Point(0, 10)),
+    ) is None
 
 
 if __name__ == '__main__':
