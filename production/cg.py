@@ -20,6 +20,8 @@ class Point(Point):
         return Point(self.x * a, self.y * a)
     def __truediv__(self, a):
         return self * (1 / Fraction(a))
+    def __repr__(self):
+        return 'Point({}, {})'.format(self.x, self.y)
 
 
 class Mat2:
