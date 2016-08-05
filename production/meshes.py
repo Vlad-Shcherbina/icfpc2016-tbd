@@ -1,5 +1,6 @@
 import pprint
 from typing import List, Tuple
+from fractions import Fraction
 
 from production import cg
 from production.cg import Point
@@ -73,9 +74,53 @@ def reconstruct_facets(problem: ioformats.Problem) -> List[List[Point]]:
     return facets
 
 
+def gen_point_in_facet(facet):
+    assert len(facet) >= 3
+    assert cg.polygon_area(facet) > 0
+
+    d = facet[1] - facet[0]
+    orth = Point(-d.y, d.x)
+    m = facet[0] + d * Fraction(1, 2)
+
+    # TODO: can fail if point happens to bo in the border
+    for i in range(10, 10000):
+        pt = m + orth * Fraction(1, 2**i)
+        if cg.count_revolutions(pt, facet) == 1:
+            return pt
+    assert False, facet
+
+
+def keep_real_facets(facets, problem):
+    result = []
+    for facet in facets:
+        a = cg.polygon_area(facet)
+        assert a != 0
+        if a < 0:
+            continue
+
+        pt = gen_point_in_facet(facet)
+        cnt = 0
+        for silh_poly in problem.silhouette:
+            a = cg.polygon_area(silh_poly)
+            assert a != 0
+            if a > 0:
+                sign = 1
+            else:
+                sign = -1
+            cnt += sign * cg.count_revolutions(pt, silh_poly)
+        assert cnt in (0, 1)
+        if cnt:
+            result.append(facet)
+
+    return result
+
+
 def main():  # pragma: no cover
     p = ioformats.load_problem('problem95')
     facets = reconstruct_facets(p)
+    print(list(map(len, facets)))
+
+    facets = keep_real_facets(facets, p)
     print(list(map(len, facets)))
 
     im = render.render_polys_and_edges(facets, [])
