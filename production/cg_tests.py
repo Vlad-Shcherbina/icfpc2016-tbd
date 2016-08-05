@@ -7,6 +7,8 @@ import pytest
 from production.cg import (
     Point,
     Mat2,
+    AffineTransform,
+    IrrationalError,
     polygon_area,
     is_point_on_edge,
     count_revolutions,
@@ -39,6 +41,45 @@ def test_mat2_ops():
 
     m = Mat2([[2, 3], [0, 1]])
     assert m.transform(Point(10, 1)) == Point(23, 1)
+
+
+@pytest.mark.parametrize('pre1,pre2,post1,post2',[
+    (Point(0, 0), Point(1, 0),
+     Point(0, 0), Point(2, 0)),
+    (Point(0, 0), Point(2, 0),
+     Point(0, 0), Point(0, 1)),
+    (Point(3, 4), Point(4, 5),
+     Point(1, 42), Point(2, 41)),
+    (Point(10, 10), Point(13, 14),
+     Point(10, 10), Point(11, 10)),
+])
+def test_align(pre1, pre2, post1, post2):
+    t = AffineTransform.align(pre1, pre2, post1, post2)
+
+    # preserves area and orientation
+    # (not testing for orthogonality, but whatever)
+    assert t.mat.det() == 1
+
+    # preserves origin
+    assert t.transform(pre1) == post1
+
+    t_d = t.transform(pre2) - t.transform(pre1)
+    post_d = post2 - post1
+
+    # same direction
+    assert t_d.cross(post_d) == 0
+    assert t_d.dot(post_d) > 0
+
+
+@pytest.mark.parametrize('pre1,pre2,post1,post2',[
+    (Point(0, 0), Point(1, 0),
+     Point(0, 0), Point(1, 1)),
+    (Point(0, 0), Point(2, 1),
+     Point(0, 0), Point(0, 1)),
+])
+def test_align_irrational(pre1, pre2, post1, post2):
+    with pytest.raises(IrrationalError):
+        AffineTransform.align(pre1, pre2, post1, post2)
 
 
 def test_area():

@@ -14,6 +14,8 @@ class Point(Point):
         return Point(self.x - other.x, self.y - other.y)
     def cross(self, other):
         return self.x * other.y - self.y * other.x
+    def dot(self, other):
+        return self.x * other.x + self.y * other.y
     def __mul__(self, a):
         return Point(self.x * a, self.y * a)
     def __truediv__(self, a):
@@ -76,6 +78,94 @@ class Mat2:
         result.a[0][1] = self.a[0][1] * d_inv * -1
         result.a[1][0] = self.a[1][0] * d_inv * -1
         return result
+
+
+class AffineTransform:
+    @staticmethod
+    def identity():
+        return AffineTransform()
+
+    def __init__(self, mat=None, offset=None):
+        self.mat = mat or Mat2()
+        self.offset = offset or Point(0, 0)
+
+    def __repr__(self):
+        return 'AffineTransform(%s, %s)'.format(self.mat, self.offset)
+
+    def __eq__(self, other):
+        return self.mat == other.mat and self.offset == other.offset
+
+    def transform(self, pt: Point) -> Point:
+        return self.mat.transform(pt) + self.offset
+
+    @staticmethod
+    def align(pre1: Point, pre2: Point,
+              post1: Point, post2: Point) -> 'AffineTransform':
+        """Congruence transform that aligns two vectors.
+
+        pre1 maps to post1
+        and transformed pre2 points in the same direction as post2
+
+        Orientation is preserved.
+
+        Raise IrrationalError when appropriate
+        (for example, when rotating 45 deg).
+        """
+        assert pre1 != pre2
+        assert post1 != post2
+
+        pre_d = pre2 - pre1
+        post_d = post2 - post1
+
+        rot_x = post_d.x * pre_d.x + post_d.y * pre_d.y
+        rot_y = post_d.y * pre_d.x - post_d.x * pre_d.y
+        d2 = rot_x * rot_x + rot_y * rot_y
+        d = rational_sqrt(d2)
+
+        rot_x /= d
+        rot_y /= d
+
+        mat = Mat2([[rot_x, -rot_y], [rot_y, rot_x]])
+        offset = post1 - mat.transform(pre1)
+
+        return AffineTransform(mat, offset)
+
+
+class IrrationalError(Exception):
+    pass
+
+
+def rational_sqrt(x: Fraction) -> Fraction:
+    """Raise IrrationalError if sqrt is irrational.
+
+    >>> rational_sqrt(Fraction(2, 8))
+    Fraction(1, 2)
+
+    >>> rational_sqrt(2)
+    Traceback (most recent call last):
+       ...
+    production.cg.IrrationalError: sqrt(2)
+    """
+    return Fraction(int_sqrt(x.numerator), int_sqrt(x.denominator))
+
+
+def int_sqrt(x: int) -> int:
+    """Raise IrrationalError if sqrt is irrational.
+
+    >>> int_sqrt(9)
+    3
+
+    >>> int_sqrt(2)
+    Traceback (most recent call last):
+       ...
+    production.cg.IrrationalError: sqrt(2)
+    """
+    # TODO: this is shit, need binary search
+    assert x >= 0
+    for i in range(10000):
+        if i * i == x:
+            return i
+    raise IrrationalError('sqrt({})'.format(x))
 
 
 def polygon_area(vertices: List[Point]) -> Fraction:
