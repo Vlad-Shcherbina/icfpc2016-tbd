@@ -9,6 +9,7 @@ from production.cg import (
     Mat2,
     AffineTransform,
     IrrationalError,
+    int_sqrt,
     polygon_area,
     is_point_on_edge,
     count_revolutions,
@@ -93,6 +94,17 @@ def test_flip(pt1, pt2):
     assert t.mat.det() == -1
     assert t.transform(pt1) == pt1
     assert t.transform(pt2) == pt2
+
+
+def test_int_sqrt():
+    squares = {i**2 for i in range(10)}
+    for i in range(100):
+        if i in squares:
+            s = int_sqrt(i)
+            assert s**2 == i
+        else:
+            with pytest.raises(IrrationalError):
+                int_sqrt(i)
 
 
 def test_area():

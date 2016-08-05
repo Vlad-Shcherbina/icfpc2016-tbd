@@ -175,12 +175,25 @@ def int_sqrt(x: int) -> int:
     Traceback (most recent call last):
        ...
     production.cg.IrrationalError: sqrt(2)
+
+    >>> int_sqrt(123456789**2)
+    123456789
     """
-    # TODO: this is shit, need binary search
     assert x >= 0
-    for i in range(10000):
-        if i * i == x:
-            return i
+
+    b = 1
+    while b * b <= x:
+        b += b
+
+    s = 0
+    while b > 0:
+        if (s + b) ** 2 <= x:
+            s += b
+        b //= 2
+
+    if s**2 == x:
+        return s
+
     raise IrrationalError('sqrt({})'.format(x))
 
 
