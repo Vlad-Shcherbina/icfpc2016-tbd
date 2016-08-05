@@ -35,7 +35,7 @@ def foldgrid(x1, y1, x2, y2) -> Solution:
     stride = len(ypoints)
     for x in range(len(xpoints) - 1):
         for y in range(len(ypoints) - 1):
-            idx = x * stride
+            idx = x * stride + y
             facets.append([idx, idx + 1, idx + stride + 1, idx + stride])
 
     return Solution(orig_points, facets, dst_points)
