@@ -85,3 +85,17 @@ def solution_to_str(sol: Solution) -> str:
         lines.append('{},{}'.format(pt.x, pt.y))
 
     return '\n'.join(lines)
+
+
+def center_problem(problem: Problem) -> Problem:
+    sx, sy, cnt = 0, 0, 0
+    for f in problem.silhouette:
+        for p in f:
+            sx += p.x
+            sy += p.y
+            cnt += 1
+    sx = sx / cnt - 0.5
+    sy = sy / cnt - 0.5
+    return Problem(
+            [[Point(p.x - sx, p.y - sy) for p in f] for f in problem.silhouette],
+            [(Point(p1.x - sx, p1.y - sy), Point(p2.x - sx, p2.y - sy)) for p1, p2 in problem.skeleton])
