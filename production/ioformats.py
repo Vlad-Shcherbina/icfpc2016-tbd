@@ -1,5 +1,6 @@
 from fractions import Fraction
 from typing import NamedTuple, List, Tuple
+from pathlib import Path
 
 from production.cg import Point
 
@@ -52,3 +53,9 @@ def parse_problem(s: str) -> Problem:
         skeleton.append((parse_point(pt1), parse_point(pt2)))
 
     return Problem(silhouette=silhouette, skeleton=skeleton)
+
+
+def load_problem(name: str) -> Problem:
+    with (Path(__file__).resolve().parent / '..' / 'problems' / '{}.txt'.format(name)).open('r') as f:
+        data = f.read()
+        return parse_problem(data) 
