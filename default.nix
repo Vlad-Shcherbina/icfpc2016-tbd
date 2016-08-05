@@ -13,6 +13,7 @@ let
         pytestcov       ? py.pytestcov,
         requests        ? py.requests2,
         swig3           ? pkgs.swig3,
+        requests        ? py.requests2,
         twisted         ? py.twisted }:
 
     mkDerivation {
@@ -25,6 +26,7 @@ let
                       pytestcov
                       requests
                       swig3
+                      requests
                       twisted ]; };
 
   drv = pkgs.callPackage f {};
