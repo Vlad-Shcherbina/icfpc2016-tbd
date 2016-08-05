@@ -85,7 +85,7 @@ class Polygon(Polygon):
 		ps = []
 		for e in self.edges:
 			p = e.intersects_with_line(e_dis)
-			if p:
+			if p and not (e.p1 == p or e.p2 == p):
 				ps.append((p, e))
 				
 		if len(ps) < 2: 
@@ -93,6 +93,9 @@ class Polygon(Polygon):
 			
 		p1, e1 = ps[0]
 		p2, e2 = ps[1]
+		
+		# if p1 == p2:
+			# return False
 		
 		print(ps)
 		
