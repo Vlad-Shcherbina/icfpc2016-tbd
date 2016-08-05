@@ -24,11 +24,13 @@ def foldpoints(target_len: Fraction) -> List[Tuple[Fraction, Fraction]]:
                     current_len - remainder)
             
 
-def foldgrid(target_width, target_height):
+def foldgrid(x1, y1, x2, y2) -> Solution:
+    target_width = x2 - x1
+    target_height = y2 - y1
     xpoints = list(foldpoints(target_width))
     ypoints = list(foldpoints(target_height))
     orig_points = [Point(x, y) for x, _ in xpoints for y, _ in ypoints]
-    dst_points = [Point(x, y) for _, x in xpoints for _, y in ypoints]
+    dst_points = [Point(x + x1, y + y1) for _, x in xpoints for _, y  in ypoints]
     facets = []
     stride = len(ypoints)
     for x in range(len(xpoints) - 1):
@@ -37,7 +39,6 @@ def foldgrid(target_width, target_height):
             facets.append([idx, idx + 1, idx + stride + 1, idx + stride])
 
     return Solution(orig_points, facets, dst_points)
-
 
 
 def _m2s(mapping):

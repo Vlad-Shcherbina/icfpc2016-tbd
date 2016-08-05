@@ -76,7 +76,7 @@ def draw_solution(canvas, solution: Solution):
 
     for poly in solution.facets:
         transformed = [solution.dst_points[idx] for idx in poly]
-        canvas.create_polygon(*toTk(transformed), fill='#FFD0D0', outline='')
+#         canvas.create_polygon(*toTk(transformed), fill='#FFD0D0', outline='')
         canvas.create_polygon(*toTk(transformed), fill='', outline='#000000', tag='skeleton')
     canvas.tag_raise('skeleton')
 
