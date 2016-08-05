@@ -68,9 +68,20 @@ def render_polys_and_edges(
     return im
 
 
+def hstack_images(im1, im2):
+    #print(im1.size)
+    assert im1.size[1] == im2.size[1]
+    #return im1
+    im = Image.new('RGBA', (im1.size[0] + im2.size[0], im1.size[1]))
+    im.paste(im1, (0, 0) + im1.size)
+    im.paste(im2, (im1.size[0], 0, im1.size[0] + im2.size[0], im1.size[1]))
+    return im
+
+
 def main():
     p = load_problem('problem95')
     im = render_polys_and_edges(p.silhouette, p.skeleton)
+    #im = hstack_images(im, im)
     im.save('hz.png')
 
 
