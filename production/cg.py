@@ -293,3 +293,25 @@ def edge_intersection(edge1, edge2) -> Optional[Point]:
         return pt
     else:
         return None
+
+
+def point_inside_unit_square(pt: Point) -> bool:
+    return 0 <= pt.x <= 1 and 0 <= pt.y <= 1
+
+
+def poly_inside_unit_square(poly: List[Point]) -> bool:
+    return all(point_inside_unit_square(pt) for pt in poly)
+
+
+def edge_on_unit_square_border(pt1: Point, pt2: Point):
+    assert point_inside_unit_square(pt1)
+    assert point_inside_unit_square(pt2)
+    if pt1.x == pt2.x == 0:
+        return True
+    if pt1.y == pt2.y == 0:
+        return True
+    if pt1.x == pt2.x == 1:
+        return True
+    if pt1.y == pt2.y == 1:
+        return True
+    return False
