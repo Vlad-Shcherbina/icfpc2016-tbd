@@ -27,7 +27,7 @@ def render_polys_and_edges(
             size - 1 - (size - 1) * (y - min_y) / (max_y - min_y),
         )
 
-    im = Image.new('RGB', (size, size))
+    im = Image.new('RGBA', (size, size))
     draw = ImageDraw.Draw(im)
 
     # Unit square, for scale
@@ -38,8 +38,8 @@ def render_polys_and_edges(
         norm(0, 1),
     ], fill=(60, 60, 60))
 
-    for poly in polys:
-        im2 = Image.new('RGB', (size, size))
+    for i, poly in enumerate(polys):
+        im2 = Image.new('RGBA', (size, size))
         draw2 = ImageDraw.Draw(im2)
 
         area = polygon_area(poly)
@@ -56,9 +56,9 @@ def render_polys_and_edges(
                 random.randrange(100),
                 random.randrange(100))
 
-        draw2.polygon([norm(pt.x, pt.y) for pt in poly], fill=color)
+        draw2.polygon([norm(pt.x, pt.y) for pt in poly], fill=color + (100,))
 
-        im = Image.blend(im, im2, 0.5)
+        im = Image.alpha_composite(im, im2)
 
     draw = ImageDraw.Draw(im)
     for pt1, pt2 in edges:
@@ -69,7 +69,7 @@ def render_polys_and_edges(
 
 
 def main():
-    p = load_problem('problem7')
+    p = load_problem('problem95')
     im = render_polys_and_edges(p.silhouette, p.skeleton)
     im.save('hz.png')
 

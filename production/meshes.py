@@ -26,17 +26,59 @@ def subdivide_edges(
     return result
 
 
+def reconstruct_facets(problem: ioformats.Problem) -> List[List[Point]]:
+    """Return list of faces corresponding to smallest pieces possible.
+
+    This set of facets covers the whole plane and is topologically equivalent
+    to a sphere. Most of the facets will be CCW and one facet that corresponds
+    to the infinite area outside will be CW.
+    """
+
+    adjacent = {}
+
+    for edge in subdivide_edges(problem.skeleton):
+        for pt1, pt2 in edge, edge[::-1]:
+            adjacent.setdefault(pt1, []).append(pt2)
+
+    for center_pt, v in adjacent.items():
+        v.sort(key=lambda pt: cg.rational_angle(pt - center_pt))
+
+    def next_in_facet(e):
+        pt1, pt2 = e
+        pts = adjacent[pt2]
+        i = pts.index(pt1)  # TODO: quadratic complexity
+        return (pt2, pts[(i - 1) % len(pts)])
+
+    facets = []
+
+    visited = set()
+    for start_pt1, v in adjacent.items():
+        for start_pt2 in v:
+            e = start_pt1, start_pt2
+            if e in visited:
+                continue
+
+            facets.append([])
+            e2 = e
+            while True:
+                facets[-1].append(e2[0])
+
+                assert e2 not in visited
+                visited.add(e2)
+
+                e2 = next_in_facet(e2)
+                if e2 == e:
+                    break
+
+    return facets
+
+
 def main():  # pragma: no cover
     p = ioformats.load_problem('problem95')
+    facets = reconstruct_facets(p)
+    print(list(map(len, facets)))
 
-    print(len(p.skeleton))
-    pprint.pprint(p.skeleton)
-
-    basic_edges = subdivide_edges(p.skeleton)
-    print(len(basic_edges))
-    pprint.pprint(basic_edges)
-
-    im = render.render_polys_and_edges([], basic_edges)
+    im = render.render_polys_and_edges(facets, [])
     im.save('hz2.png')
 
 
