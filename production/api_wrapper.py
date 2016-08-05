@@ -85,7 +85,7 @@ def main():
     print(get_problem('f4b1a8567108144bae331340a57c68b85df487e0'))
 
     # test solution submission
-    response = submit_solution(7, 'sol_7.txt')
+    response = submit_solution(7, '../solutions/sol_7.txt')
     print(response.text)
 
 if __name__ == "__main__":
