@@ -7,6 +7,7 @@ from production.cg import Point
 from production import ioformats
 from production import meshes
 from production import render
+from production import api_wrapper
 
 
 FrontierEntry = NamedTuple('FrontierEntry', [
@@ -280,8 +281,8 @@ class Solver:
                 for f2 in adjacent(f):
                     worklist.append(f2)
 
-            print()
-            print('cluster', cluster)
+            #print()
+            #print('cluster', cluster)
 
             cluster_pile = set()
             cluster_orig_edges = []
@@ -305,8 +306,8 @@ class Solver:
                         cluster_orig_edges.append(orig_edge)
                         cluster_dst_edges.append(dst_edge)
 
-            print(cluster_orig_edges)
-            print(cluster_dst_edges)
+            #print(cluster_orig_edges)
+            #print(cluster_dst_edges)
 
             cluster_orig_pts = []
             cluster_dst_pts = []
@@ -327,8 +328,8 @@ class Solver:
                     break
 
             assert len(cluster_orig_pts) == len(cluster_orig_edges)
-            print(cluster_orig_pts)
-            print(cluster_dst_pts)
+            #print(cluster_orig_pts)
+            #print(cluster_dst_pts)
 
             result.append((cluster_orig_pts, cluster_dst_pts))
 
@@ -363,28 +364,13 @@ class Solver:
 
     def rec(self, state):
         if self.is_final(state):
-            im = self.render_state(state)
-            thingie = self.to_normalized_thingie(state)
-            print('thingie', thingie)
-
-            im = render.hstack_images(im, render_thingie(thingie))
-
-            im.save('SOLUTION.png')
-
-            sol = thingie_to_solution(thingie)
-            print('-' * 20)
-            print(ioformats.solution_to_str(sol))
-            print('-' * 20)
-
-            print('SOLVED')
-            exit()
-            assert False, 'SOLVED'
+            process_final_state(self, state)
 
         successors = self.state_successors(state)
         if not successors:
             print('*' * 40)
             print('snapshot', self.snapshot_cnt)
-            pprint.pprint(state.frontier)
+            print('frontier size', len(state.frontier))
 
             self.render_state(state).save(
                 'tmp/{:06}.png'.format(self.snapshot_cnt))
@@ -428,12 +414,37 @@ def thingie_to_solution(thingie):
         orig_points=orig_points, facets=facets, dst_points=dst_points)
 
 
+#problem_id = '027'
+import sys
+problem_id = sys.argv[1]
+
+def process_final_state(solv, state):
+    im = solv.render_state(state)
+    thingie = solv.to_normalized_thingie(state)
+    print('thingie', thingie)
+
+    im = render.hstack_images(im, render_thingie(thingie))
+
+    im.save('SOLUTION.png')
+
+    sol = thingie_to_solution(thingie)
+    sol = ioformats.solution_to_str(sol)
+    print('-' * 20)
+    print(sol)
+    print('-' * 20)
+
+    r = api_wrapper.submit_solution(int(problem_id), sol)
+    print(r.text)
+
+    print('SOLVED')
+    exit()
+
 
 def main():
     if not os.path.exists('tmp'):
         os.mkdir('tmp')
 
-    p = ioformats.load_problem('011')
+    p = ioformats.load_problem(problem_id)
     solv = Solver(p)
 
     for state in solv.gen_initial_states():
