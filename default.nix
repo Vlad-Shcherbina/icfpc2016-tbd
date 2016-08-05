@@ -11,6 +11,7 @@ let
         pillow          ? py.pillow,
         pytest          ? py.pytest,
         pytestcov       ? py.pytestcov,
+        requests        ? py.requests2,
         swig3           ? pkgs.swig3,
         twisted         ? py.twisted }:
 
@@ -22,6 +23,7 @@ let
                       pillow
                       pytest
                       pytestcov
+                      requests
                       swig3
                       twisted ]; };
 
