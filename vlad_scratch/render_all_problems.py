@@ -7,12 +7,12 @@ from production import render
 
 
 def main():
-    path = os.path.join(__file__, '..', '..', 'manpages_scratch', '*.problem')
+    path = os.path.join(__file__, '..', '..', 'problems', '*.txt')
     path = os.path.normpath(path)
     print(path)
 
     for filename in glob.glob(path):
-        m = re.search(r'-(\d+).problem', os.path.basename(filename))
+        m = re.search(r'(\d+).txt', os.path.basename(filename))
         print(filename)
         with open(filename) as fin:
             problem = ioformats.parse_problem(fin.read())

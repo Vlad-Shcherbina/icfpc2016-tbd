@@ -1,4 +1,4 @@
 pytest
 pytest-cov
 Pillow
-requests2
+requests

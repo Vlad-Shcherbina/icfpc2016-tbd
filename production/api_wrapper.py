@@ -1,7 +1,6 @@
-import re
-
 import requests
-import json
+
+from time import sleep
 
 headers = {
     'Expect': '',
@@ -54,7 +53,7 @@ solution_spec_file should be a valid path to a solution file
 '''
 # solution_spec_file :: str
 # publish_time :: int
-def submit_problem(solution_spec_file, publish_time):
+def submit_problem(publish_time, solution_spec_file):
     s = {'solution_spec' : open(solution_spec_file, 'r')}
     t = {'publish_time' : publish_time}
 
@@ -71,13 +70,21 @@ def submit_solution(problem_id, solution_spec_file):
     p = {'problem_id' : problem_id}
     s = {'solution_spec' : open(solution_spec_file, 'r')}
 
-    return requests.post('http://2016sv.icfpcontest.org/api/solution/submit', data=p, files=s, headers=headers)
+    r = requests.post('http://2016sv.icfpcontest.org/api/solution/submit', data=p, files=s, headers=headers)
     if r.status_code == 200:
         return r
     else:
         raise Exception("Couldn't submit the solution")
 
 
+'''
+This function sleeps for 1 second after every submission so as to support painless submission
+(due to the constraint of 1 query per second)
+'''
+def s_submit_solution(problem_id, solution_spec_file):
+    r = submit_solution(problem_id, solution_spec_file)
+    sleep(1)
+    return r
 
 
 def main():

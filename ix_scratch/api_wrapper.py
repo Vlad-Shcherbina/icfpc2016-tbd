@@ -28,6 +28,7 @@ def get_latest_snapshot_hash():
 def blob_lookup(lhash):
     url = 'http://2016sv.icfpcontest.org/api/blob/' + lhash
     r = requests.get(url, headers=headers)
+    print(r.status_code)
     if r.status_code == 200:
         return r
     else:
@@ -44,7 +45,7 @@ def get_solution(lhash):
     return r.text
 
 # lhash :: str
-def get_snaphot(lhash):
+def get_snapshot(lhash):
     r = blob_lookup(lhash)
     return r.json()
 
@@ -85,7 +86,7 @@ def main():
     print(get_problem('f4b1a8567108144bae331340a57c68b85df487e0'))
 
     # test solution submission
-    response = submit_solution(7, 'sol_7.txt')
+    response = submit_solution(7, '../solutions/sol_7.txt')
     print(response.text)
 
 if __name__ == "__main__":

@@ -83,12 +83,21 @@ sleep(1)
 with open('/tmp/toscrape') as f:
 	scores = json.load(f) 
 
-for problem in scores['problems'][71:]:
-	sleep(1)
-	h = problem['problem_spec_hash']
-	i = problem['problem_id']
-	s = problem['problem_size']
-	t = getBlob(h).text
-	pprint.pprint(t)
-	with open(str(s) + '-' + h + '-' + str(i) + '.problem', 'w+') as f:
-		f.write(t)
+#for problem in scores['problems'][71:]:
+#	sleep(1)
+#	h = problem['problem_spec_hash']
+#	i = problem['problem_id']
+#	s = problem['problem_size']
+#	t = getBlob(h).text
+#	pprint.pprint(t)
+#	with open(str(s) + '-' + h + '-' + str(i) + '.problem', 'w+') as f:
+#		f.write(t)
+
+problem = scores['problems'][79]
+h = problem['problem_spec_hash']
+i = problem['problem_id']
+s = problem['problem_size']
+t = getBlob(h).text
+pprint.pprint(t)
+with open(str(s) + '-' + h + '-' + str(i) + '.problem', 'w+') as f:
+    f.write(t)

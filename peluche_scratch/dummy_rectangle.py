@@ -4,6 +4,7 @@ Chose a rectangle shape maximizing the jaccard index.
 
 import random
 
+from fractions import Fraction
 from typing import NamedTuple, List, Tuple, Optional
 from production import cg
 from production.cg import Point
@@ -88,18 +89,25 @@ def chose_rect(poly: List[Point], sample_size: int = 1000, round_count: int = 10
     print(score_rect(rect, points, poly_area, area_by_point))
     # return rect
     return [
-        Point(rect[0], rect[1]),
-        Point(rect[2], rect[1]),
-        Point(rect[2], rect[3]),
-        Point(rect[0], rect[3])
+        Point(Fraction(rect[0]), Fraction(rect[1])),
+        Point(Fraction(rect[0]), Fraction(rect[3])),
+        Point(Fraction(rect[2]), Fraction(rect[3])),
+        Point(Fraction(rect[2]), Fraction(rect[1]))
     ]
+    # clockwise
+    # return [
+    #     Point(rect[0], rect[1]),
+    #     Point(rect[2], rect[1]),
+    #     Point(rect[2], rect[3]),
+    #     Point(rect[0], rect[3])
+    # ]
     
 def visualize(argv):
     from production.render import render_polys_and_edges
     from production.ioformats import load_problem
-    poly = load_problem("015").silhouette[0]
+    poly = load_problem("013").silhouette[0]
     # poly = [Point(0, 0), Point(0, -20), Point (0, 0), Point(1, 0), Point(1, 1), Point(0, 1)]
-    rect = chose_rect(poly, sample_size=10000, round_count=1000)
+    rect = chose_rect(poly, sample_size=1000, round_count=100)
     print(rect)
     im = render_polys_and_edges([poly, rect], [], size=1000)
     im.save('x.png')
