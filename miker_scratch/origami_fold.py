@@ -94,12 +94,15 @@ class Polygon(Polygon):
 		p1, e1 = ps[0]
 		p2, e2 = ps[1]
 		
+		print(ps)
+		
 		es1, es2 = [], []
 		es = es1
 		for e in self.edges:
-			if (e is e1) or (e is es2):
-				e_new = Edge(e.p1, p1)
-				if not e.is_zero:
+			if (e is e1) or (e is e2):
+				e_new = Edge(e.p1, p1 if e is e1 else p2)
+				# print('NEW top', e_new)
+				if not e_new.is_zero:
 					es.append(e_new)
 				
 				if es is es1:
@@ -109,7 +112,8 @@ class Polygon(Polygon):
 					es.append(Edge(p2, p1))
 					es = es1
 					
-				e_new = Edge(p1, e.p2)
+				e_new = Edge(p1 if e is e1 else p2, e.p2)
+				# print('NEW bottoms', e_new)
 				if not e_new.is_zero:
 					es.append(e_new)
 			else:
