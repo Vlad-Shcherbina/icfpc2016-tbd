@@ -5,7 +5,7 @@ from fractions import Fraction
 import pytest
 
 from production.cg import (
-    Point, polygon_area, is_point_on_edge, count_revolutions)
+    Point, polygon_area, is_point_on_edge, count_revolutions, rational_angle)
 
 
 unit_square = [
@@ -62,6 +62,16 @@ def test_count_revolutions():
     assert count_revolutions(Point(-2, 0), unit_square) == 0
     assert count_revolutions(Point(2, 1), unit_square) == 0
     assert count_revolutions(Point(-2, 1), unit_square) == 0
+
+
+def test_rational_angle():
+    assert rational_angle(Point(10, 0)) == 0
+    assert rational_angle(Point(0, 10)) == 1
+    assert rational_angle(Point(-10, 0)) == 2
+    assert rational_angle(Point(0, -10)) == 3
+
+    assert rational_angle(Point(1, 1)) == Fraction(1, 2)
+    assert rational_angle(Point(-1, -3)) == Fraction(3, 4) + 2
 
 
 if __name__ == '__main__':

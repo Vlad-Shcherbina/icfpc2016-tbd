@@ -67,3 +67,21 @@ def count_revolutions(pt: Point, poly: List[Point]) -> int:
                     cnt -= 1
 
     return cnt
+
+
+def rational_angle(pt: Point) -> Fraction:
+    """Kinda like atan2, but rational.
+
+    Return some monotonous transformation of angle (so it can still be used
+    for sorting).
+    Result is in [0, 4) range.
+    """
+
+    assert pt != Point(0, 0)
+
+    rot = 0
+    while not (pt.x > 0 and pt.y >= 0):
+        rot += 1
+        pt = Point(pt.y, -pt.x)
+
+    return pt.y / Fraction(pt.x + pt.y) + rot
