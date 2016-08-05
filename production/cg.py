@@ -20,6 +20,64 @@ class Point(Point):
         return self * (1 / Fraction(a))
 
 
+class Mat2:
+    @staticmethod
+    def identity():
+        return Mat2()
+
+    def __init__(self, a=None):
+        if a is None:
+            self.a = [[1, 0], [0, 1]]
+        else:
+            assert len(a) == 2
+            assert len(a[0]) == 2
+            assert len(a[1]) == 2
+            self.a = [list(row) for row in a]
+
+    def __repr__(self):
+        return 'Mat2([{}, {}], [{}, {}])'.format(
+            self.a[0][0], self.a[0][1], self.a[1][0], self.a[1][1])
+
+    def __eq__(self, other):
+        return self.a == other.a
+
+    def transform(self, pt: Point) -> Point:
+        a = self.a
+        return Point(
+            x=pt.x * a[0][0] + pt.y * a[0][1],
+            y=pt.x * a[1][0] + pt.y * a[1][1],
+        )
+
+    def __mul__(self, k: Fraction) -> 'Mat2':
+        assert isinstance(k, (int, Fraction)), k
+        result = Mat2()
+        for i in range(2):
+            for j in range(2):
+                result.a[i][j] = self.a[i][j] * k
+        return result
+
+    def __matmul__(self, other):
+        result = Mat2()
+        for i in range(2):
+            for j in range(2):
+                result.a[i][j] = sum(
+                    self.a[i][k] * other.a[k][j] for k in range(2))
+        return result
+
+    def det(self):
+        return self.a[0][0] * self.a[1][1] - self.a[0][1] * self.a[1][0]
+
+    def inv(self):
+        d = self.det()
+        d_inv = 1 / Fraction(d)
+        result = Mat2()
+        result.a[0][0] = self.a[1][1] * d_inv
+        result.a[1][1] = self.a[0][0] * d_inv
+        result.a[0][1] = self.a[0][1] * d_inv * -1
+        result.a[1][0] = self.a[1][0] * d_inv * -1
+        return result
+
+
 def polygon_area(vertices: List[Point]) -> Fraction:
     """Counterclockwise results in positive area."""
     assert vertices
@@ -67,7 +125,6 @@ def count_revolutions(pt: Point, poly: List[Point]) -> int:
     for pt1, pt2 in edges:
         if min(pt1.y, pt2.y) <= pt.y < max(pt1.y, pt2.y):
             t = (pt.y - pt1.y) / Fraction(pt2.y - pt1.y)
-            print(pt, pt1, pt2, t)
             assert 0 <= t <= 1
             x = pt1.x + t * (pt2.x - pt1.x)
             assert x != pt.x

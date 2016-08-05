@@ -6,6 +6,7 @@ import pytest
 
 from production.cg import (
     Point,
+    Mat2,
     polygon_area,
     is_point_on_edge,
     count_revolutions,
@@ -20,6 +21,24 @@ unit_square = [
     Point(1, 1),
     Point(0, 1),
 ]
+
+
+def test_mat2_ops():
+    assert Mat2.identity() @ Mat2.identity() == Mat2.identity()
+
+    m = Mat2([[42, 1], [-7, Fraction(1, 5)]])
+    m_inv = m.inv()
+    print(m)
+    print(m_inv)
+    print(Mat2.identity())
+    print(m @ m_inv)
+    assert m @ m_inv == Mat2.identity()
+    assert m_inv @ m == Mat2.identity()
+
+    assert m == (m * 2) * Fraction(1, 2)
+
+    m = Mat2([[2, 3], [0, 1]])
+    assert m.transform(Point(10, 1)) == Point(23, 1)
 
 
 def test_area():
