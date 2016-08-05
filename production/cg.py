@@ -90,13 +90,18 @@ class AffineTransform:
         self.offset = offset or Point(0, 0)
 
     def __repr__(self):
-        return 'AffineTransform(%s, %s)'.format(self.mat, self.offset)
+        return 'AffineTransform({}, {})'.format(self.mat, self.offset)
 
     def __eq__(self, other):
         return self.mat == other.mat and self.offset == other.offset
 
     def transform(self, pt: Point) -> Point:
         return self.mat.transform(pt) + self.offset
+
+    def __matmul__(self, other):
+        mat = self.mat @ other.mat
+        offset = self.mat.transform(other.offset) + self.offset
+        return AffineTransform(mat, offset)
 
     @staticmethod
     def align(pre1: Point, pre2: Point,
@@ -129,6 +134,15 @@ class AffineTransform:
         offset = post1 - mat.transform(pre1)
 
         return AffineTransform(mat, offset)
+
+    @staticmethod
+    def mirror(pt1: Point, pt2: Point):
+        assert pt1 != pt2
+        flip = AffineTransform(Mat2([[1, 0], [0, -1]]))
+        fixup = AffineTransform.align(
+            flip.transform(pt1), flip.transform(pt2),
+            pt1, pt2)
+        return fixup @ flip
 
 
 class IrrationalError(Exception):

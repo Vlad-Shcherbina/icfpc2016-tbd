@@ -43,7 +43,7 @@ def test_mat2_ops():
     assert m.transform(Point(10, 1)) == Point(23, 1)
 
 
-@pytest.mark.parametrize('pre1,pre2,post1,post2',[
+@pytest.mark.parametrize('pre1,pre2,post1,post2', [
     (Point(0, 0), Point(1, 0),
      Point(0, 0), Point(2, 0)),
     (Point(0, 0), Point(2, 0),
@@ -71,7 +71,7 @@ def test_align(pre1, pre2, post1, post2):
     assert t_d.dot(post_d) > 0
 
 
-@pytest.mark.parametrize('pre1,pre2,post1,post2',[
+@pytest.mark.parametrize('pre1,pre2,post1,post2', [
     (Point(0, 0), Point(1, 0),
      Point(0, 0), Point(1, 1)),
     (Point(0, 0), Point(2, 1),
@@ -80,6 +80,19 @@ def test_align(pre1, pre2, post1, post2):
 def test_align_irrational(pre1, pre2, post1, post2):
     with pytest.raises(IrrationalError):
         AffineTransform.align(pre1, pre2, post1, post2)
+
+
+@pytest.mark.parametrize('pt1,pt2', [
+    (Point(0, 0), Point(1, 0)),
+    (Point(0, 0), Point(1, 1)),
+    (Point(1, 2), Point(7, 3)),
+    (Point(-3, 1), Point(2, 9)),
+])
+def test_flip(pt1, pt2):
+    t = AffineTransform.mirror(pt1, pt2)
+    assert t.mat.det() == -1
+    assert t.transform(pt1) == pt1
+    assert t.transform(pt2) == pt2
 
 
 def test_area():
