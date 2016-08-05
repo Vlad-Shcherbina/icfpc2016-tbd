@@ -87,20 +87,13 @@ def chose_rect(poly: List[Point], sample_size: int = 1000, round_count: int = 10
         rect = max(rects, key=lambda r: score_rect(r, points, poly_area, area_by_point))
         # print(score_rect(rect, points, poly_area, area_by_point))
     print(score_rect(rect, points, poly_area, area_by_point))
-    # return rect
+    rect = (max(0, rect[0]), max(0, rect[1]), min(1, rect[2]), min(1, rect[3])
     return [
         Point(Fraction(rect[0]), Fraction(rect[1])),
         Point(Fraction(rect[0]), Fraction(rect[3])),
         Point(Fraction(rect[2]), Fraction(rect[3])),
         Point(Fraction(rect[2]), Fraction(rect[1]))
     ]
-    # clockwise
-    # return [
-    #     Point(rect[0], rect[1]),
-    #     Point(rect[2], rect[1]),
-    #     Point(rect[2], rect[3]),
-    #     Point(rect[0], rect[3])
-    # ]
     
 def visualize(argv):
     from production.render import render_polys_and_edges
