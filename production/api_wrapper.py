@@ -71,7 +71,7 @@ def submit_solution(problem_id, solution_spec_file):
     p = {'problem_id' : problem_id}
     s = {'solution_spec' : open(solution_spec_file, 'r')}
 
-    return requests.post('http://2016sv.icfpcontest.org/api/solution/submit', data=p, files=s, headers=headers)
+    r = requests.post('http://2016sv.icfpcontest.org/api/solution/submit', data=p, files=s, headers=headers)
     if r.status_code == 200:
         return r
     else:
