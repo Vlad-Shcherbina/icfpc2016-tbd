@@ -83,9 +83,7 @@ sleep(1)
 with open('/tmp/toscrape') as f:
 	scores = json.load(f) 
 
-k = 1
-
-for problem in scores['problems']:
+for problem in scores['problems'][71:]:
 	sleep(1)
 	h = problem['problem_spec_hash']
 	i = problem['problem_id']
