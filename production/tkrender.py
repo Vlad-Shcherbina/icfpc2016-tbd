@@ -150,7 +150,8 @@ class ProblemBrowser(object):
                 p = center_problem(p)
             if self.reconstruct_cb.var.get():
                 facets = meshes.reconstruct_facets(p)
-#                 print(len([f for f in facets if polygon_area(f) < 0]))
+                # paranoid about that extra facet.
+                assert len([f for f in facets if polygon_area(f) < 0]) == 1
                 facets = [f for f in facets if polygon_area(f) > 0]
                 skeleton = [e for f in facets for e in edges_of_a_facet(f)]
                 p = Problem(facets, skeleton)
