@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# it's a bother to preserve the existing one both on Unix and Windows because they use different
+# separators (":" vs ";", and Python _does_ get confused)
+export PYTHONPATH="$PWD"

@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 from fractions import Fraction
 from production.cg import Point, polygon_area
 
