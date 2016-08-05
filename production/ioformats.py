@@ -62,8 +62,12 @@ def parse_problem(s: str) -> Problem:
     return Problem(silhouette=silhouette, skeleton=skeleton)
 
 
+def get_root() -> Path:
+    return Path(__file__).resolve().parent / '..'
+    
+
 def load_problem(name: str) -> Problem:
-    with (Path(__file__).resolve().parent / '..' / 'problems' / '{}.txt'.format(name)).open('r') as f:
+    with (get_root() / 'problems' / '{}.txt'.format(name)).open('r') as f:
         data = f.read()
         return parse_problem(data)
 
