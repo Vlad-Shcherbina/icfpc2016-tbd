@@ -15,6 +15,9 @@ def mult_vector(p, n):
 
 Edge = NamedTuple('Edge', [('p1', Point), ('p2', Point)])
 class Edge(Edge):
+
+	def __repr__(self):
+		return 'Edge(%r, %r)' % self
 	
 	@memoized_property
 	def r0(self):
@@ -68,12 +71,12 @@ class Polygon(Polygon):
 		
 	transform = cg.AffineTransform.identity()
 		
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		if 'transform' in kwargs:
-			self.transform = kwargs['transform']
+	# def __init__(self, *args, **kwargs):
+		# if 'transform' in kwargs:
+			# self.transform = kwargs.pop('transform')
+		# super().__init__(*args, **kwargs)
 		
-	def dissect(e_dis):
+	def dissect(self, e_dis):
 		# apply transform to dissector line
 		transform = self.transform
 		e_dis = e_dis.transform(transform)
@@ -91,12 +94,15 @@ class Polygon(Polygon):
 		p1, e1 = ps[0]
 		p2, e2 = ps[1]
 		
+		print(ps)
+		
 		es1, es2 = [], []
 		es = es1
 		for e in self.edges:
-			if (e is e1) or (e is es2):
-				e_new = Edge(e.p1, p1)
-				if not e.is_zero:
+			if (e is e1) or (e is e2):
+				e_new = Edge(e.p1, p1 if e is e1 else p2)
+				# print('NEW top', e_new)
+				if not e_new.is_zero:
 					es.append(e_new)
 				
 				if es is es1:
@@ -106,13 +112,19 @@ class Polygon(Polygon):
 					es.append(Edge(p2, p1))
 					es = es1
 					
-				e_new = Edge(p1, e.p2)
+				e_new = Edge(p1 if e is e1 else p2, e.p2)
+				# print('NEW bottoms', e_new)
 				if not e_new.is_zero:
 					es.append(e_new)
 			else:
 				es.append(e)
 		
-		return Polygon(es1, transform=transform), Polygon(es2, transform=transform)
+		def spawn_polygon(es):
+			poly = Polygon(es)
+			poly.transform = transform
+			return poly
+		
+		return spawn_polygon(es1), spawn_polygon(es2)
 		
 		
 		
@@ -131,19 +143,35 @@ def fold(polys, e_dis):
 		ret_polys.append(poly2)
 	
 	return ret_polys
-		
-pnts = [
-	(0, 0),
-	(1, 0),
-	(0.5, 0.5),
-	(0.5, -0.5)
-]
+
 
 def make_point(t):
 	c1, c2 = t
 	return Point(Fraction(c1), Fraction(c2))
+
+def make_points(pnts):
+	return list(map(make_point, pnts))
 	
-pnts = list(map(make_point, pnts))
+def make_poly(pnts):
+	return Polygon(list(map(lambda t:Edge(*t), zip(pnts, pnts[1:] + [pnts[0]]))))
+
+	
+pnts = make_points([
+	(0, 0),
+	(1, 0),
+	(0.5, 0.5),
+	(0.5, -0.5)
+])
 
 e1 = Edge(pnts[0], pnts[1])
 e2 = Edge(pnts[2], pnts[3])
+
+pnts_unitsq = make_points([
+	(0, 0),
+	(0, 1),
+	(1, 1),
+	(1, 0)
+])
+
+unitsq = make_poly(pnts_unitsq)
+
