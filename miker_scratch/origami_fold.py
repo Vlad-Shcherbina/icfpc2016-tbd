@@ -23,6 +23,9 @@ class Edge(Edge):
 	@memoized_property
 	def a(self):
 		return self.p2 - self.p1
+		
+	def transform(self, at):
+		return Edge(at.transform(self.p1), at.transform(self.p2))
 	
 	def _intersects(self, e):
 		p1, p2 = self.r0, e.r0		# radius-vector to the first end point
@@ -53,10 +56,23 @@ class Edge(Edge):
 			
 		return self.r0 + mult_vector(self.a, t1)
 		
+	@property
+	def is_zero(self):
+		a = self.a
+		ax = a.x; ay = a.y
+		return ax == 0 and ay == 0
+		
+		
 Polygon = NamedTuple('Polygon', [('edges', List[Edge])])
 class Polygon(Polygon):
 		
-	def dissect_polygon(e_dis):
+	transform = cg.AffineTransform.identity()
+		
+	def dissect(e_dis):
+		# apply transform to dissector line
+		e_dis = e_dis.transform(self.transform)
+	
+		# find intersections with edges
 		ps = []
 		for e in self.edges:
 			p = e.intersects_with_line(e_dis)
@@ -73,7 +89,9 @@ class Polygon(Polygon):
 		es = es1
 		for e in self.edges:
 			if (e is e1) or (e is es2):
-				es.append(Edge(e.p1, p1))
+				e_new = Edge(e.p1, p1)
+				if not e.is_zero:
+					es.append(e_new)
 				
 				if es is es1:
 					es.append(Edge(p1, p2))
@@ -82,12 +100,25 @@ class Polygon(Polygon):
 					es.append(Edge(p2, p1))
 					es = es1
 					
-				es.append(Edge(p1, e.p2))
+				e_new = Edge(p1, e.p2)
+				if not e_new.is_zero:
+					es.append(e_new)
 			else:
 				es.append(e)
 		
 		return Polygon(es1), Polygon(es2)
 		
+		
+		
+def fold(polys, e_dis):
+	for poly in polys:
+		ret = poly.dissect(e_dis)
+		if not ret:
+			continue
+			
+		poly1, poly2 = ret
+		
+	
 		
 pnts = [
 	(0, 0),
