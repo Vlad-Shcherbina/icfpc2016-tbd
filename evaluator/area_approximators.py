@@ -1,5 +1,6 @@
 from fractions import Fraction
 
+from peluche_scratch import dummy_rectangle
 from production import cg
 
 class Matcher:
@@ -77,6 +78,11 @@ class GridAreaApproximator:
     def __init__(self, points, polys, matchers):
         self.points = points
         self.polys = polys
+        all_points = [point for poly in polys for point in poly]
+        (self.min_x, self.max_x,
+         self.min_y, self.max_y) = dummy_rectangle.bounding_box(all_points)
+        self.x_spacing = (self.max_x - self.min_x) / points
+        self.y_spacing = (self.max_y - self.min_y) / points
         self.poly_edges = [list(zip(poly, poly[1:] + poly[:1]))
                            for poly in polys]
         self.matchers = matchers
@@ -85,8 +91,8 @@ class GridAreaApproximator:
     def approximate(self):
         for x in range(self.points):
             for y in range(self.points):
-                pt = cg.Point(Fraction(x, self.points),
-                              Fraction(y, self.points))
+                pt = cg.Point(self.min_x + x * self.x_spacing,
+                              self.min_y + y * self.y_spacing)
                 decisions = []
                 for edges, poly in zip(self.poly_edges, self.polys):
                     if any(cg.is_point_on_edge(pt, edge) for edge in edges):

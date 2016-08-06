@@ -1,3 +1,5 @@
+from sys import argv
+
 from evaluator import area_approximators as aas
 from production import cg, ioformats
 
@@ -5,6 +7,7 @@ import miker_scratch.origami_fold as of
 
 
 def evaluate_solution(sol_num):
+    print('Evaluating solution #%d' % sol_num)
     polys = []
     matchers = []
     prob_matchers = []
@@ -98,7 +101,10 @@ def demo():
 
 
 def main():
-    evaluate_solution(1)
+    sol_id = 1
+    if len(argv) > 1:
+        sol_id = int(argv[1])
+    evaluate_solution(sol_id)
 
 
 if __name__ == "__main__":

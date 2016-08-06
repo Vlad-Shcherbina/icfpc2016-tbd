@@ -87,7 +87,7 @@ def chose_rect(poly: List[Point], sample_size: int = 1000, round_count: int = 10
         rect = max(rects, key=lambda r: score_rect(r, points, poly_area, area_by_point))
         # print(score_rect(rect, points, poly_area, area_by_point))
     print(score_rect(rect, points, poly_area, area_by_point))
-    rect = (max(0, rect[0]), max(0, rect[1]), min(1, rect[2]), min(1, rect[3])
+    rect = (max(0, rect[0]), max(0, rect[1]), min(1, rect[2]), min(1, rect[3]))
     return [
         Point(Fraction(rect[0]), Fraction(rect[1])),
         Point(Fraction(rect[0]), Fraction(rect[3])),
