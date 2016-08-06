@@ -70,7 +70,7 @@ class Matcher:
 
 class GridAreaApproximator:
     """
-    Approximates the areas of polygons inside the unit square.
+    Approximates the areas of polygons inside their bounding box.
 
     The results are set according to the `matchers` parameter.
     """
