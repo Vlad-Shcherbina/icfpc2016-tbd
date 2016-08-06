@@ -22,9 +22,10 @@ class RandomFolder(types.SimpleNamespace):
 		t = (r(), r())
 		return Edge(*t)
 		
-	def fold(self):
+	def random_fold(self):
 		polys = [unitsq]
-		for i in range(self.count):
+		count = self.count
+		while len(polys) < count:
 			e = None
 			while not e or e.is_zero:
 				e = self.random_line()

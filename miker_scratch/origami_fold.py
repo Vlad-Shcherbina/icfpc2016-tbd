@@ -154,7 +154,8 @@ def fold(polys, e_dis, dir=0):
 def point_to_str(p):
 	return ','.join([str(x) for x in p])
 
-def write_fold(polys, f):
+import sys
+def write_fold(polys, f=sys.stdout):
 	d = {}  # point -> polygon
 	pp = [] # list of polygon point ids
 	i = 0
