@@ -1,6 +1,7 @@
 import requests
 
 from time import sleep
+from pprint import pprint
 
 headers = {
     'Expect': '',
@@ -62,24 +63,31 @@ def submit_problem(publish_time, solution_spec_file):
     r = requests.post('http://2016sv.icfpcontest.org/api/problem/submit', data=t, files=s, headers=headers)
     if r.status_code == 200:
         return r
+    elif r.status_code == 429:
+        sleep(1)
+        return submit_problem(publish_time, solution_spec_file)
     else:
+        pprint((r.status_code, r.text))
         raise Exception("Couldn't submit the problem")
         
 
-# problem_id :: int
+# problem_id :: utctime
 # solution_spec :: str
 def submit_solution(problem_id, solution_spec, file=False):
     p = {'problem_id' : problem_id}
     
     if file:
-      solution_spec = open(solution_spec, 'r')
-    s = {'solution_spec' : solution_spec)}
+        solution_spec = open(solution_spec, 'r')
+    s = {'solution_spec' : solution_spec}
 
     r = requests.post('http://2016sv.icfpcontest.org/api/solution/submit', data=p, files=s, headers=headers)
     if r.status_code == 200:
         return r
+    elif r.status_code == 429:
+        sleep(1)
+        return submit_solution(problem_id, solution_spec)
     else:
-        print(r.text)
+        pprint((r.status_code, r.text))
         raise Exception("Couldn't submit the solution")
 
 

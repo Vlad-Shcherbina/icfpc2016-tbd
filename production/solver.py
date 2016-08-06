@@ -1,4 +1,6 @@
-import os
+#!/bin/env python3
+
+import os, sys
 import pprint
 from typing import NamedTuple, Tuple, Dict, List
 
@@ -38,7 +40,9 @@ class SolvedException(Exception):
 
 
 class Solver:
-    def __init__(self, p: ioformats.Problem):
+    def __init__(self, p: ioformats.Problem, problem_id, solution_pipe=None):
+        self.problem_id = problem_id
+        self.solution_pipe = solution_pipe
         self.snapshot_cnt = 0
 
         self.facets = meshes.reconstruct_facets(p)
@@ -364,7 +368,7 @@ class Solver:
 
     def rec(self, state):
         if self.is_final(state):
-            process_final_state(self, state)
+            process_final_state(self, state, self.solution_pipe)
 
         successors = self.state_successors(state)
         if not successors:
@@ -414,11 +418,7 @@ def thingie_to_solution(thingie):
         orig_points=orig_points, facets=facets, dst_points=dst_points)
 
 
-#problem_id = '027'
-import sys
-problem_id = sys.argv[1]
-
-def process_final_state(solv, state):
+def process_final_state(solv, state, solution_pipe=None):
     im = solv.render_state(state)
     thingie = solv.to_normalized_thingie(state)
     print('thingie', thingie)
@@ -432,9 +432,13 @@ def process_final_state(solv, state):
     print('-' * 20)
     print(sol)
     print('-' * 20)
+    
 
-    r = api_wrapper.submit_solution(int(problem_id), sol)
+    r = api_wrapper.s_submit_solution(int(solv.problem_id), sol)
     print(r.text)
+
+    if solution_pipe is not None:
+        solution_pipe.send(sol)
 
     print('SOLVED')
     exit()
@@ -444,8 +448,9 @@ def main():
     if not os.path.exists('tmp'):
         os.mkdir('tmp')
 
+    problem_id = sys.argv[1]
     p = ioformats.load_problem(problem_id)
-    solv = Solver(p)
+    solv = Solver(p, problem_id)
 
     for state in solv.gen_initial_states():
         solv.rec(state)
