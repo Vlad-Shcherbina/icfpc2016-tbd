@@ -8,6 +8,7 @@ let
 
   f = { mkDerivation    ? pkgs.stdenv.mkDerivation,
         python          ? pkgs.python3,
+        bottle          ? py.bottle,
         pillow          ? py.pillow,
         pytest          ? py.pytest,
         pytestcov       ? py.pytestcov,
@@ -20,6 +21,7 @@ let
       version = "0.1.0.0";
       src = ./.;
       buildInputs = [ python
+                      bottle
                       pillow
                       pytest
                       pytestcov
