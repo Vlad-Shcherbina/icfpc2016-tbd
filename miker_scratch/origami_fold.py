@@ -178,3 +178,16 @@ pnts_unitsq = make_points([
 
 unitsq = make_poly(pnts_unitsq)
 
+
+def polygon_to_set(poly):
+	return frozenset(map(lambda e:e.p1, poly.edges))
+	
+def polygons_to_set(polys):
+	return frozenset(map(polygon_to_set, polys))
+
+def compare_folds(f1, f2):
+	s1, s2 = tuple(map(polygons_to_set, (f1, f2)))
+	if s1 == s2:
+		return True
+	
+	return (s1 - s2), (s2 - s1)
