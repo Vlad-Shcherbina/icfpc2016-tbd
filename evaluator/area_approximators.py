@@ -16,40 +16,45 @@ class Matcher:
     Can be one of:
         * Matcher.Area(poly_num): tells the approximator to compute the area of
           the polygon #`poly_num`.
-        * Matcher.And(poly_num1, poly_num2): tells the approximator to compute
-          the intersection area of the polygons #`poly_num1` and `poly_num2`.
-        * Matcher.Or(poly_num1, poly_num2): tells the approximator to compute
-          the union area of the polygons #`poly_num1` and `poly_num2`.
+        * Matcher.And(nested_matchers): tells the approximator to compute
+          the intersection area of the figures specified by the nested matchers.
+        * Matcher.Or(nested_matchers): tells the approximator to compute
+          the union area of the figures specified by the nested matchers.
     """
 
     AREA = 0
     AND = 1
     OR = 2
 
-    def __init__(self, matcher_type, num1, num2=None):
+    def __init__(self, matcher_type, param):
         self.matcher_type = matcher_type
-        self.num1 = num1
-        self.num2 = num2
+        if self.matcher_type == self.AREA:
+            self.num = param
+        else:
+            self.nested_matchers = param
 
     def decision(self, polygon_decisions):
         if self.matcher_type == self.AREA:
-            return polygon_decisions[self.num1]
+            return polygon_decisions[self.num]
         elif self.matcher_type == self.AND:
-            return polygon_decisions[self.num1] and polygon_decisions[self.num2]
+            return all(matcher.decision(polygon_decisions) for
+                       matcher in self.nested_matchers)
         elif self.matcher_type == self.OR:
-            return polygon_decisions[self.num1] or polygon_decisions[self.num2]
+            return any(matcher.decision(polygon_decisions) for
+                       matcher in self.nested_matchers)
 
     @classmethod
     def Area(cls, poly_num):
         return cls(cls.AREA, poly_num)
 
     @classmethod
-    def And(cls, poly_num1, poly_num2):
-        return cls(cls.AND, poly_num1, poly_num2)
+    def And(cls, nested_matchers):
+        return cls(cls.AND, nested_matchers)
 
     @classmethod
-    def Or(cls, poly_num1, poly_num2):
-        return cls(cls.OR, poly_num1, poly_num2)
+    def Or(cls, nested_matchers):
+        return cls(cls.OR, nested_matchers)
+
 
 class GridAreaApproximator:
     """
