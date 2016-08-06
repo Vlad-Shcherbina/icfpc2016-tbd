@@ -29,9 +29,17 @@ def fold_at_3_4(polys, eps=Fraction(-1, 2)):
     return fold(polys, Edge(Point(botr.x - 1, botr.y + eps),
                             Point(botr.x + 3, botr.y + 1 + eps + 4)))
 
+# def fold_at_3_4_2(polys):
+#     # eps = Fraction(1, 50) # tweek me for 3/4 rot
+#     eps = Fraction(1, 6) 
+#     return fold(polys, Edge(Point(Fraction(1), Fraction(1, 2) + eps),
+#                             Point(Fraction(3, 2) + 3, Fraction(0) + eps + 4)))
+
+
 def fold_at_45_2(polys):
-    # eps = Fraction(1, 50) # tweek me for 3/4 rot
-    eps = Fraction(1, 5)
+    # eps = Fraction(1, 50) # 1st submission
+    # eps = Fraction(1, 5) # TWEEK HERE
+    eps = Fraction(1, 7) # TWEEK HERE
     return fold(polys, Edge(Point(Fraction(1), Fraction(1, 2) + eps),
                             Point(Fraction(3, 2), Fraction(0) + eps)))
 
@@ -45,6 +53,7 @@ def quadratic_skeleton(n):
         polys = fold(polys, e)
     # polys = fold_at_45(polys)
     polys = fold_at_3_4(polys)
+    # polys = fold_at_3_4_2(polys)
     polys = fold_at_45_2(polys)
     return polys
 
