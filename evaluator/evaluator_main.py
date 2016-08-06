@@ -1,49 +1,61 @@
-from sys import argv
+import argparse
 
 from evaluator import area_approximators as aas
 from production import cg, ioformats
 
-import miker_scratch.origami_fold as of
+import production.origami_fold as of
 
 
-def evaluate_solution(sol_num):
-    print('Evaluating solution #%d' % sol_num)
+
+def evaluate_file(prob_id, sol_id):
+    print('Evaluating solution #%s' % sol_id)
+    
+    with open('solutions/%s.txt' % sol_id) as f:
+        sol = ioformats.parse_solution(f.read())
+
+    prob = ioformats.load_problem(prob_id)
+
+    return evaluate(prob, sol)
+
+def evaluate_strings(probs, sols, sol_num=None):
+    if sol_num is not None:
+        print('Evaluating solution #%s' % sol_num)
+  
+    sol = parse_solution(sols)
+
+    prob = ioformats.parse_problem(probs)
+    
+    return evaluate(prob, sol)
+
+def evaluate_solution(prob, sol, sol_num=None):
+    if sol_num is not None:
+        print('Evaluating solution #%s' % sol_num)
+  
+    return evaluate(prob, sol)
+
+
+def evaluate(prob, sol):
     polys = []
     matchers = []
     prob_matchers = []
-    with open('problems/%03d.txt' % sol_num) as inf:
-        prob_polys_cnt = int(inf.readline().strip())
-        for poly_id in range(prob_polys_cnt):
-            poly = []
-            points_cnt = int(inf.readline().strip())
-            for point_id in range(points_cnt):
-                poly.append(ioformats.parse_point(inf.readline()))
-            matcher = aas.Matcher.Area(len(polys))
-            if cg.polygon_area(poly) < 0:
-                matcher = aas.Matcher.Not(matcher)
-            polys.append(poly)
-            prob_matchers.append(matcher)
+    for poly in prob.silhouette:
+        matcher = aas.Matcher.Area(len(polys))
+        if cg.polygon_area(poly) < 0:
+            matcher = aas.Matcher.Not(matcher)
+        polys.append(poly)
+        prob_matchers.append(matcher)
     # AND because of holes.
     prob_matcher = aas.Matcher.And(prob_matchers)
     sol_matchers = []
-    with open('solutions/%03d.txt' % sol_num) as inf:
-        points_cnt = int(inf.readline().strip())
-        for point_id in range(points_cnt):
-            inf.readline()
-        sol_polys_cnt = int(inf.readline().strip())
-        sol_facets = []
-        for facet_id in range(sol_polys_cnt):
-            sol_facets.append(list(map(int, inf.readline().strip().split(' '))))
-        points = [ioformats.parse_point(inf.readline())
-                  for i in range(points_cnt)]
-        sol_polys = []
-        for poly_id in range(sol_polys_cnt):
-            poly = [points[i] for i in sol_facets[poly_id][1:]]
-            append_poly_with_inclusion(sol_polys, poly)
-        for poly in sol_polys:
-            matcher = aas.Matcher.Area(len(polys))
-            polys.append(poly)
-            sol_matchers.append(matcher)
+    sol_polys_cnt = len(sol.facets)
+    sol_polys = []
+    for f in sol.facets:
+        poly = [sol.dst_points[i] for i in f]
+        append_poly_with_inclusion(sol_polys, poly)
+    for poly in sol_polys:
+        matcher = aas.Matcher.Area(len(polys))
+        polys.append(poly)
+        sol_matchers.append(matcher)
     sol_matcher = aas.Matcher.Or(sol_matchers)
     appr = aas.GridAreaApproximator(200, polys, [
         aas.Matcher.And([prob_matcher, sol_matcher]),
@@ -127,10 +139,11 @@ def demo():
 
 
 def main():
-    sol_id = 1
-    if len(argv) > 1:
-        sol_id = int(argv[1])
-    evaluate_solution(sol_id)
+    parser = argparse.ArgumentParser(description='Validate solution in a file')
+    parser.add_argument(dest='prob_id')
+    parser.add_argument(dest='sol_id')
+    args = parser.parse_args()
+    evaluate_file(args.prob_id, args.sol_id)
 
 
 if __name__ == "__main__":
