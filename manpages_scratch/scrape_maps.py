@@ -36,11 +36,15 @@ ticks = 0
 ##########
 # conf:
 
-fetched_qty = 936
-missed_ids = [ 1758 ]
+fetched_qty = 1000
+missed_ids = [ ]
 
 #
 ##########
+
+with open('.last_tick') as f:
+    fetched_qty = int(f.read())
+
 for problem in scores['problems']:
     ticks += 1
     if ticks < fetched_qty and (not problem['problem_id'] in missed_ids):
@@ -58,4 +62,4 @@ for problem in scores['problems']:
     with open(('0' * n) + str(i) + '.txt', 'w+') as f:
         f.write(t)
 with open('.last_tick', 'w+') as f:
-    f.write(str(tick))
+    f.write(str(ticks))
