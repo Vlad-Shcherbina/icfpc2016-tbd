@@ -54,8 +54,8 @@ class Edge(Edge):
 		
 	def intersects_with_line(self, e):
 		t = self._intersects(e)
-		if t is False:
-			return False
+		if not t:
+			return t
 			
 		t1, t2 = t
 		
