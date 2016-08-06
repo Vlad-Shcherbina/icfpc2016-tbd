@@ -17,7 +17,13 @@ class TestIntersections(unittest.TestCase):
         e2 = of.Edge(p[19], p[20])
         f1 = plg.dissect(e1)
         f2 = f1[1].dissect(e2) + (f1[0],)
-        self.assertTrue(of.compare_folds(f2, of.fold(of.fold([plg], e1), e2)))
+        f_auto = of.fold(of.fold([plg], e1), e2)
+        print("------- Manual fold:")
+        print(f2)
+        print("------- origami_fold.fold:")
+        print(f_auto)
+        print("-------")
+        self.assertTrue(of.compare_folds(f2, f_auto) is True)
 
     def test_2(self):
         plg = unitsq()
@@ -26,7 +32,14 @@ class TestIntersections(unittest.TestCase):
         e2 = of.Edge(p[21], p[22])
         f1 = plg.dissect(e1)
         f2 = f1[1].dissect(e2) + (f1[0],)
-        self.assertTrue(of.compare_folds(f2, of.fold(of.fold([plg], e1), e2)))
+        f_auto = of.fold(of.fold([plg], e1), e2)
+        print("------- Manual fold:")
+        print(f2)
+        print("------- origami_fold.fold:")
+        print(f_auto)
+        print("-------")
+        self.assertTrue(of.compare_folds(f2, f_auto) is True)
+
 
     def test_3(self):
         plg = unitsq()
@@ -34,7 +47,7 @@ class TestIntersections(unittest.TestCase):
         e1 = of.Edge(p[0], p[23])
         e2 = of.Edge(p[21], p[22])
         f2 = plg.dissect(e2)
-        self.assertTrue(of.compare_folds(f2, of.fold(of.fold([plg], e1), e2)))
+        self.assertTrue(of.compare_folds(f2, of.fold(of.fold([plg], e1), e2)) is True)
         
 
 def points():
