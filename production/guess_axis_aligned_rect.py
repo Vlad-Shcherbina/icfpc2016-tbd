@@ -9,6 +9,8 @@ from fractions import Fraction
 from typing import NamedTuple, List, Tuple, Optional
 from production import cg
 from production.cg import Point
+from production.bbfold import foldgrid
+from production import api_wrapper
 
 def bounding_box(poly: List[Point]) -> List[int]:
     """Return the bounding box for a polygon"""
@@ -101,13 +103,39 @@ def chose_rect(poly: List[Point], sample_size: int = 1000, round_count: int = 10
     
 def visualize(argv):
     from production.render import render_polys_and_edges
-    from production.ioformats import load_problem
-    for i in range(1, 101):
+    from production.ioformats import load_problem, solution_to_str
+    for i in range(37, 50):
+        print('*' * 50)
+        print(i)
         poly = load_problem('{:>03}'.format(i)).silhouette[0]
         rect = chose_rect(poly, sample_size=1000, round_count=100)
-        print(rect)
+        #print(rect)
+
+        x1 = min(p.x for p in rect)
+        y1 = min(p.y for p in rect)
+        x2 = max(p.x for p in rect)
+        y2 = max(p.x for p in rect)
+        #print(x1, y1, x2, y2)
+
         im = render_polys_and_edges([poly, rect], [], size=1000)
         im.save('img/{:>03}.png'.format(i))
+
+        #s = foldgrid(Fraction(, 2), Fraction(1, 2))
+        #s = foldgrid(x1, y1, x2, y2)
+        s = foldgrid(0, 0, 1, 1)
+        s = solution_to_str(s)
+
+        print('foldgrid({}, {}, {}, {})'.format(x1, y1, x2, y2))
+        print('---')
+        print(s)
+        print('solution size', len(s))
+
+        r = api_wrapper.submit_solution(i, s)
+        print(r.text)
+
+        import time
+        time.sleep(2)
+
 
 if __name__ == '__main__':
     import sys
