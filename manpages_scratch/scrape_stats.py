@@ -51,7 +51,8 @@ for problem in d['problems']:
             partials += 1
             size_partials += res['solution_size']
 
-    crunch.append({'ones': (ones, size_ones), 'partials': (partials, size_partials), 'id': problem['problem_id']})
+    crunch.append({'ones': (ones, size_ones), 'partials': (partials, size_partials),
+                   'id': problem['problem_id'], 'size': problem['problem_size']})
 
 scrunch = sorted(crunch, key=lambda x: x['ones'][0])
 
