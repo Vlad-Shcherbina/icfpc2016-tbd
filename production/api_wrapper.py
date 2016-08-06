@@ -73,7 +73,7 @@ def submit_solution(problem_id, solution_spec, file=False):
     
     if file:
       solution_spec = open(solution_spec, 'r')
-    s = {'solution_spec' : solution_spec)}
+    s = {'solution_spec' : solution_spec}
 
     r = requests.post('http://2016sv.icfpcontest.org/api/solution/submit', data=p, files=s, headers=headers)
     if r.status_code == 200:
