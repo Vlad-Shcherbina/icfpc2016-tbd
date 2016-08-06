@@ -1,19 +1,23 @@
 from sys import argv
 from math import sqrt
+import argparse
 
-from evaluator import area_approximators as aas
 from production import cg, ioformats
 
-import miker_scratch.origami_fold as of
+import production.origami_fold as of
 
+
+'''
+Use validate_file, validate_string, validate_solution from end programms
+according to the type you want to validate.
+'''
 
 def validate_file(sol_num):
-    print('Validating solution #%d' % sol_num)
+    print('Validating solution #%s' % sol_num)
     
-    with open('solutions/%03d.txt' % sol_num) as f:
+    with open('solutions/%s.txt' % sol_num) as f:
         sol_str = f.read()
-    sol_length = len(''.join(sol_str.split()))
-    if sol_length > 5000:
+    if ioformats.solution_size(sol_str) > 5000:
         return (False, "Solution too long")
 
     sol = ioformats.parse_solution(sol_str)
@@ -24,8 +28,7 @@ def validate_string(sol, sol_num=None):
     if sol_num is not None:
       print('Validating solution #%d' % sol_num)
     
-    sol_length = len(''.join(sol_str.split()))
-    if sol_length > 5000:
+    if ioformats.solution_size(sol_str) > 5000:
         return (False, "Solution too long")
 
     sol = ioformats.parse_solution(sol_str)
@@ -38,8 +41,7 @@ def validate_solution(sol, sol_num=None):
     
     sol_str = ioformats.solution_to_str(sol)
 
-    sol_length = len(''.join(sol_str.split()))
-    if sol_length > 5000:
+    if ioformats.solution_size(sol_str) > 5000:
         return (False, "Solution too long")
 
     return validate(sol)
@@ -132,9 +134,10 @@ def get_edges(op, facet):
     return res
 
 def main():
-    sol_id = 1
-    if len(argv) > 1:
-        sol_id = int(argv[1])
+    parser = argparse.ArgumentParser(description='Validate solution in a file')
+    parser.add_argument(dest='sol_id')
+    args = parser.parse_args()
+    sol_id = args.sol_id
     v = validate_file(sol_id)
     if v is True:
         print("Solution validated")
