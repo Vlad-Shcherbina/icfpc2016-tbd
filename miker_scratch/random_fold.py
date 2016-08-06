@@ -1,4 +1,4 @@
-from origami_fold import *
+from production.origami_fold import *
 
 import random, types
 
@@ -7,7 +7,7 @@ center_point = Point(Fraction(1, 2), Fraction(1, 2))
 
 class RandomFolder(types.SimpleNamespace):
 	
-	spread = 5 # int
+	spread = 9 # int
 	count = 5
 	
 	def random_int(self):
@@ -22,18 +22,34 @@ class RandomFolder(types.SimpleNamespace):
 	def random_line(self):
 		r = self.random_point
 		p1, p2 = r(), r()
-		p2 = Point(*map(lambda x:x*Fraction(5,3), p2))
+		p2 = Point(*map(lambda x:x*Fraction(2,3), p2))
+		return Edge(p1, p2)
+		
+	def random_gauss(self):
+		return Fraction(round(random.gauss(0.5, 0.7), 1))
+		
+	def random_hline(self):
+		p1 = Point(Fraction(0, 1), self.random_gauss())
+		p2 = Point(Fraction(1, 1), self.random_gauss())
+		return Edge(p1, p2)
+	
+	def random_vline(self):
+		p1 = Point(self.random_gauss(), Fraction(0, 1))
+		p2 = Point(self.random_gauss(), Fraction(1, 1))
 		return Edge(p1, p2)
 		
 	def random_fold(self, polys=None):
 		if polys is None:
 			polys = [unitsq]
 		count = self.count
+		i = 0
 		while len(polys) < count:
 			e = None
 			while not e or e.is_zero:
-				e = self.random_line()
+				#~ e = self.random_hline() if i % 2 == 0 else self.random_vline()
+				e = self.random_line() 
 			
+			i += 1
 			polys = fold(polys, e)
 			
 			# take a point and offset all transforms to make it a center

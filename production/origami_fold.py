@@ -37,12 +37,15 @@ class Edge(Edge):
 		a1, a2 = self.a, e.a		# direction vector with module equal to edge length
 		p = p2 - p1
 		d = a1.x * (-a2.y) - a1.y * (-a2.x)	# Cramer's method
-		
-		if d == 0:
-			return False
-		
+	
 		d1 = p.x * (-a2.y) - p.y * (-a2.x)
 		d2 = a1.x * p.y - a1.y * p.x
+			
+		if d == 0:
+			if d1 == 0 and d2 == 0:
+				return None  # overlay (infinite set of common points)
+			else:
+				return False # no common point
 		
 		t1 = d1 / d
 		t2 = d2 / d
@@ -116,7 +119,9 @@ class Polygon(Polygon):
 		ps = []
 		for e in self.edges:
 			p = e.intersects_with_line(e_dis)
-			if p and not (e.p1 == p or e.p2 == p):
+			if p is None:
+				return False
+			if p:
 				ps.append((p, e))
 				
 		if len(ps) < 2: 
