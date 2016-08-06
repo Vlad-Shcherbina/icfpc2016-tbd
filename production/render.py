@@ -1,5 +1,6 @@
 from typing import List, Tuple
 import random
+from fractions import Fraction
 
 from PIL import Image, ImageDraw
 
@@ -114,7 +115,7 @@ class Renderer:
         h = self.max_y - self.min_y
 
         # ensure 1:1 ratio
-        d = (w - h) / 2
+        d = (w - h) / Fraction(2)
         self.min_y -= max(d, 0)
         self.max_y += max(d, 0)
         self.min_x -= max(-d, 0)

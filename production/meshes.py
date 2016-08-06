@@ -85,7 +85,8 @@ def gen_point_in_facet(facet):
     # TODO: can fail if point happens to bo in the border
     for i in range(10, 10000):
         pt = m + orth * Fraction(1, 2**i)
-        if cg.count_revolutions(pt, facet) == 1:
+        if (not cg.is_point_on_poly_border(pt, facet) and
+            cg.count_revolutions(pt, facet) == 1):
             return pt
     assert False, facet
 

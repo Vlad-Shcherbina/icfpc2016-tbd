@@ -234,6 +234,11 @@ def is_point_on_edge(pt: Point, edge: Tuple[Point, Point]) -> bool:
     return dx * dyp == dy * dxp
 
 
+def is_point_on_poly_border(pt: Point, poly: List[Point]) -> bool:
+    edges = list(zip(poly, poly[1:] + poly[:1]))
+    return any(is_point_on_edge(pt, edge) for edge in edges)
+
+
 def count_revolutions(pt: Point, poly: List[Point]) -> int:
     """The number of revolutions the polygon "makes" around the point.
 
