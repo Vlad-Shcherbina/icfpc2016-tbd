@@ -67,18 +67,27 @@ def validate(sol):
 
         '''
         This right now solves three validation problems:
-        - all facet polygons should simple
-        - the intersection set of any two different facets has zero area
+        - all facet polygons should be simple
+        - the intersection set of any two different facets should have zero area
         - if two different edges share a point, the point should always be
         one of the endpoints for both the edges
         With shitty quadratic approaches. Will optimizing it require several passes?
         '''
         for f2 in sol.facets:
             if do_facets_intersect(sol.orig_points, f1, f2):
-                return (False, "The edges or facets are intersecting.")
+                return (False, "The edges or facets are intersecting")
+    s = 0
+    for f in sol.facets:
+        vs = list(map((lambda x: sol.orig_points[x]), f))
+        s += union_polygon_area(vs)
+    if s != 1:
+        return (False, "Union set does not equal the unit square")
+
 
     return True
 
+def union_polygon_area(vertices):
+    return abs(cg.polygon_area(vertices))
 
 def transformed_congruently(op, facet, dp):
     edges = get_edges(op, facet)
