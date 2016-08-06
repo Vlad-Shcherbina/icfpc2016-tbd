@@ -234,6 +234,11 @@ def is_point_on_edge(pt: Point, edge: Tuple[Point, Point]) -> bool:
     return dx * dyp == dy * dxp
 
 
+def is_point_on_poly_border(pt: Point, poly: List[Point]) -> bool:
+    edges = list(zip(poly, poly[1:] + poly[:1]))
+    return any(is_point_on_edge(pt, edge) for edge in edges)
+
+
 def count_revolutions(pt: Point, poly: List[Point]) -> int:
     """The number of revolutions the polygon "makes" around the point.
 
@@ -314,6 +319,22 @@ def edge_intersection(edge1, edge2) -> Optional[Point]:
     else:
         return None
 
+def edge_intersection_not_at_endpoints(edge1, edge2) -> Optional[Point]:
+    """
+    Note: return None for the case where the (only) intersection point
+    is a shared endpoint for both edges.
+    """
+    p = edge_intersection(edge1, edge2)
+
+    if p is not None:
+        if not point_is_endpoint(p, edge1) or not point_is_endpoint(p, edge2):
+          return p
+            
+    return None
+
+def point_is_endpoint(p, edge):
+    p1, p2 = edge
+    return p1 == p or p2 == p
 
 def point_inside_unit_square(pt: Point) -> bool:
     return 0 <= pt.x <= 1 and 0 <= pt.y <= 1
