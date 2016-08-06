@@ -26,9 +26,6 @@ def evaluate_solution(sol_num):
     # AND because of holes.
     prob_matcher = aas.Matcher.And(prob_matchers)
     sol_matchers = []
-    #TODO: detect coinciding/nested facets; it would improve
-    # efficiency dramatically.
-    # Should be easy: facets are convex.
     with open('solutions/%03d.txt' % sol_num) as inf:
         points_cnt = int(inf.readline().strip())
         for point_id in range(points_cnt):
@@ -39,8 +36,11 @@ def evaluate_solution(sol_num):
             sol_facets.append(list(map(int, inf.readline().strip().split(' '))))
         points = [ioformats.parse_point(inf.readline())
                   for i in range(points_cnt)]
+        sol_polys = []
         for poly_id in range(sol_polys_cnt):
             poly = [points[i] for i in sol_facets[poly_id][1:]]
+            append_poly_with_inclusion(sol_polys, poly)
+        for poly in sol_polys:
             matcher = aas.Matcher.Area(len(polys))
             polys.append(poly)
             sol_matchers.append(matcher)
@@ -51,6 +51,32 @@ def evaluate_solution(sol_num):
     ])
     values = appr.approximate()
     print(values[0] / values[1])
+
+
+def append_poly_with_inclusion(polys, new_poly):
+    """
+    Modifies `polys` so that:
+        * The union set of `polys` covers `new_poly`
+        * `polys` don't contain such two polygons that one is subset of another.
+    """
+    new_polys = [new_poly]
+    new_edges = list(zip(new_poly, new_poly[1:] + new_poly[:1]))
+    for poly_id, poly in enumerate(polys):
+        edges = list(zip(poly, poly[1:] + poly[:1]))
+        new_poly_in_old = True
+        for new_vert in new_poly:
+            if (all(not cg.is_point_on_edge(new_vert, edge) for edge in edges)
+                and cg.count_revolutions(new_vert, poly) == 0):
+                new_poly_in_old = False
+                break
+        if new_poly_in_old:
+            return
+        for vert in poly:
+            if (all(not cg.is_point_on_edge(vert, edge) for edge in new_edges)
+                and cg.count_revolutions(vert, new_poly) == 0):
+                new_polys.append(poly)
+                break
+    polys[:] = new_polys
 
 
 def demo():
