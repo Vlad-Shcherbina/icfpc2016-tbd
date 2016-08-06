@@ -38,9 +38,19 @@ if __name__ == '__main__':
 	import argparse
 	parser = argparse.ArgumentParser(description='Random fold generator.')
 	parser.add_argument('-n', '--count', metavar='N', dest="count", type=int, help='target polygon count (not less than)')
-	args = parser.parse_args()
+	parser.add_argument('--to-png', metavar='PNG_PATH', dest="png_path", help='output png')
+	parser.add_argument('--png-size', metavar='PNG_SIZE', dest="png_size", type=int, default=100, help='output png size')
+	args = parser.parse_args().__dict__
 	
-	rfl = RandomFolder(**{k: v for k, v in args.__dict__.items() if v is not None})
+	png_path = args.pop('png_path')
+	png_size = args.pop('png_size')
+	
+	rfl = RandomFolder(**{k: v for k, v in args.items() if v is not None})
 	fold = rfl.random_fold()
 	write_fold(fold)
 	
+	if png_path:
+		from production.render import render_polys_and_edges
+		fold_for_render = list(map(lambda x:list(polygon_points(x)), fold))
+		im = render_polys_and_edges(fold_for_render, [], size=png_size)
+		im.save(png_path)

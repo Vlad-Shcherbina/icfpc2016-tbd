@@ -70,7 +70,12 @@ Polygon = NamedTuple('Polygon', [('edges', List[Edge])])
 class Polygon(Polygon):
 		
 	transform = cg.AffineTransform.identity()
-	inv = False
+	#~ inv = False
+	t_number = 0
+	
+	@property
+	def inv(self):
+		return (self.t_number % 2 == 1)
 		
 	# def __init__(self, *args, **kwargs):
 		# if 'transform' in kwargs:
@@ -138,7 +143,7 @@ def fold(polys, e_dis, dir=0):
 		poly1, poly2 = ret
 		poly_to_transform = ret[dir if not poly.inv else (1-dir)]
 		poly_to_transform.transform = poly_to_transform.transform @ cg.AffineTransform.mirror(*e_dis)
-		poly_to_transform.inv = not poly_to_transform.inv
+		poly_to_transform.t_number += 1
 		
 		ret_polys.append(poly1)
 		ret_polys.append(poly2)
@@ -149,15 +154,17 @@ def fold(polys, e_dis, dir=0):
 def point_to_str(p):
 	return ','.join([str(x) for x in p])
 
-import sys
+import sys, collections
 def write_fold(polys, f=sys.stdout):
-	d = {}  # point -> polygon
+	polys = sorted(polys, key=lambda x:-x.t_number)  # highest transformation number goes first
+	
+	d = collections.OrderedDict()  # point -> polygon
 	pp = [] # list of polygon point ids
 	i = 0
 	for poly in polys:
 		ppi = []
 		pp.append(ppi)
-		for p in reversed(list(polygon_points(poly))):
+		for p in polygon_points(poly):
 			if p not in d:
 				d[p] = (poly, i)
 				i += 1
