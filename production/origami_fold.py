@@ -264,14 +264,17 @@ pnts = make_points([
 e1 = Edge(pnts[0], pnts[1])
 e2 = Edge(pnts[2], pnts[3])
 
-pnts_unitsq = make_points([
+pnts_unitsq = [
 	(0, 0),
 	(0, 1),
 	(1, 1),
 	(1, 0)
-])
+]
 
-unitsq = make_poly(pnts_unitsq)
+unitsq = make_poly(make_points(pnts_unitsq))
+
+def unitsq_f():
+	return make_poly(make_points(pnts_unitsq))
 
 
 def polygon_points(poly):

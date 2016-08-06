@@ -40,7 +40,7 @@ class RandomFolder(types.SimpleNamespace):
 		
 	def random_fold(self, polys=None):
 		if polys is None:
-			polys = [unitsq]
+			polys = [unitsq_f()]
 		count = self.count
 		i = 0
 		while len(polys) < count:
@@ -63,6 +63,16 @@ class RandomFolder(types.SimpleNamespace):
 			
 		return polys
 		
+		
+def render_png(fold, png_path, output_transformed=False, png_size=100):
+	from production.render import render_polys_and_edges
+	if not output_transformed:
+		fold_for_render = list(map(lambda x:list(polygon_points(x)), fold))
+	else:
+		fold_for_render = list(map(lambda x:x.trans_points, fold))
+	im = render_polys_and_edges(fold_for_render, [], size=png_size)
+	im.save(png_path)
+	
 			
 if __name__ == '__main__':
 	import argparse
@@ -82,13 +92,7 @@ if __name__ == '__main__':
 	write_fold(fold)		
 	
 	if png_path:
-		from production.render import render_polys_and_edges
-		fold_for_render = list(map(lambda x:list(polygon_points(x)), fold))
-		im = render_polys_and_edges(fold_for_render, [], size=png_size)
-		im.save(png_path)
-	
+		render_png(fold, png_path, png_size=png_size)
+		
 	if png_trans_path:
-		from production.render import render_polys_and_edges
-		fold_for_render = list(map(lambda x:x.trans_points, fold))
-		im = render_polys_and_edges(fold_for_render, [], size=png_size)
-		im.save(png_trans_path)
+		render_png(fold, png_trans_path, True, png_size=png_size)
