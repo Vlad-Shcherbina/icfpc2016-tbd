@@ -1,3 +1,5 @@
+
+from production import ioformats
 from production import cg
 from production.cg import Point
 
@@ -229,7 +231,7 @@ def write_fold(polys, f=sys.stdout):
 					
 	for p in points_dst:				# destination point coords
 		f.write(point_to_str(p)); f.write('\n')
-	
+	return ioformats.Solution(orig_points=points_src, facets=pp, dst_points=points_dst)
 	
 
 
