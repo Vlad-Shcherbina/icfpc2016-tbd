@@ -52,7 +52,7 @@ def test_load_problem():
             (Point(x=1, y=0), Point(x=1, y=1)),
             (Point(x=0, y=1), Point(x=1, y=1)),
             ])
-    assert load_problem('001') == expected_problem
+    assert load_problem('00001') == expected_problem
 
 
 def test_solution_to_str():
