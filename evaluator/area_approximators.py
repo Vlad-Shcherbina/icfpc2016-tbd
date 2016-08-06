@@ -14,8 +14,10 @@ class Matcher:
     approximator.
 
     Can be one of:
-        * Matcher.Area(poly_num): tells the approximator to compute the area of
+        * Matcher.Area(poly_num): tells the approximator to include the area of
           the polygon #`poly_num`.
+        * Matcher.Not(matcher): tells the approximator to exclude the area
+          of the figure specified by the nested matcher.
         * Matcher.And(nested_matchers): tells the approximator to compute
           the intersection area of the figures specified by the nested matchers.
         * Matcher.Or(nested_matchers): tells the approximator to compute
@@ -25,11 +27,14 @@ class Matcher:
     AREA = 0
     AND = 1
     OR = 2
+    NOT = 3
 
     def __init__(self, matcher_type, param):
         self.matcher_type = matcher_type
         if self.matcher_type == self.AREA:
             self.num = param
+        elif self.matcher_type == self.NOT:
+            self.nested_matcher = param
         else:
             self.nested_matchers = param
 
@@ -42,6 +47,8 @@ class Matcher:
         elif self.matcher_type == self.OR:
             return any(matcher.decision(polygon_decisions) for
                        matcher in self.nested_matchers)
+        elif self.matcher_type == self.NOT:
+            return not nested_matcher.decision(polygon_decisions)
 
     @classmethod
     def Area(cls, poly_num):
@@ -54,6 +61,10 @@ class Matcher:
     @classmethod
     def Or(cls, nested_matchers):
         return cls(cls.OR, nested_matchers)
+
+    @classmethod
+    def Not(cls, nested_matcher):
+        return cls(cls.NOT, nested_matcher)
 
 
 class GridAreaApproximator:
