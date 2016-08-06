@@ -87,6 +87,15 @@ def solution_to_str(sol: Solution) -> str:
     return '\n'.join(lines)
 
 
+def solution_size(s: str) -> int:
+    r"""
+    >>> solution_size('1, 2\n3')
+    4
+    """
+    assert isinstance(s, str)
+    return sum(1 for c in s if not c.isspace())
+
+
 def parse_solution(s: str) -> Problem:
     lines = iter(line for line in s.splitlines() if line.strip())
 
