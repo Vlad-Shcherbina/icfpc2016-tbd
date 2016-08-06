@@ -71,3 +71,10 @@ for problem in d['problems']:
 scrunch = sorted(crunch, key=lambda x: x['ones'][0])
 
 pprint(scrunch)
+
+fmt = '{id:>6}{solution_size:>6}{ones[0]:>8}{hours_ago:>10}'
+print(fmt.format(
+        id='id', solution_size='size', ones=('#exact', 0), hours_ago='ago(h)'))
+for q in sorted(scrunch, key=lambda q: q['hours_ago']):
+    q['hours_ago'] = int(q['hours_ago'])
+    print(fmt.format(**q))
