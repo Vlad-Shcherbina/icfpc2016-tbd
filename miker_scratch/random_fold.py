@@ -3,9 +3,11 @@ from origami_fold import *
 import random, types
 
 
+center_point = Point(Fraction(1, 2), Fraction(1, 2))
+
 class RandomFolder(types.SimpleNamespace):
 	
-	spread = 2 # int
+	spread = 5 # int
 	count = 5
 	
 	def random_int(self):
@@ -19,8 +21,9 @@ class RandomFolder(types.SimpleNamespace):
 	
 	def random_line(self):
 		r = self.random_point
-		t = (r(), r())
-		return Edge(*t)
+		p1, p2 = r(), r()
+		p2 = Point(*map(lambda x:x*Fraction(5,3), p2))
+		return Edge(p1, p2)
 		
 	def random_fold(self, polys=None):
 		if polys is None:
@@ -30,38 +33,21 @@ class RandomFolder(types.SimpleNamespace):
 			e = None
 			while not e or e.is_zero:
 				e = self.random_line()
-			polys = fold(polys, e)
-		return polys
-		
-	def random_fold2(self, polys=None):
-		if polys is None:
-			polys = [unitsq]
-		count = self.count
-		
-		def random_edge():
-			poly = random.choice(polys)
-			edge = random.choice(poly.edges)
-			return edge
-		
-		def random_point_on_edge(e):
-			rand = random.random()
-			return e.r0 + Point(*map(lambda x:x*rand, e.a))
-		
-		while len(polys) < count:
-			e1, e2 = random_edge(), random_edge()
-			if e1 == e2: 
-				continue
-			
-			p1 = random_point_on_edge(e1)
-			p2 = random_point_on_edge(e2)
-			
-			e = Edge(p1, p2)
 			
 			polys = fold(polys, e)
-		
+			
+			# take a point and offset all transforms to make it a center
+			p = polys[0].trans_points[0]
+			offs = p - center_point
+			
+			for poly in polys:
+				t = poly.transform
+				t.offset -= offs
+				poly.transform = t
+			
 		return polys
 		
-		
+			
 if __name__ == '__main__':
 	import argparse
 	parser = argparse.ArgumentParser(description='Random fold generator.')
