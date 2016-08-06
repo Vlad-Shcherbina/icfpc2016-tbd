@@ -14,6 +14,7 @@ class Renderer:
     im = Renderer().draw_problem(p).get_img()
 
     Use hstack_images() to compose output of individual renderers.
+    See tests for more usage examples.
     """
 
     def __init__(self):
@@ -24,7 +25,7 @@ class Renderer:
     def draw_unit_square(self):
         self.draw_poly(
             [Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)],
-            color=(60, 60, 60))
+            color=(60, 60, 60, 200))
         return self
 
     def draw_poly(self, poly: List[Point], color=None):
@@ -40,13 +41,13 @@ class Renderer:
                     random.randrange(100),
                     random.randrange(150, 256),
                     random.randrange(100),
-                    100)
+                    150)
             else:
                 color = (
                     random.randrange(150, 256),
                     random.randrange(100),
                     random.randrange(100),
-                    100)
+                    150)
 
         for pt in poly:
             self.update_viewport(pt)
@@ -88,6 +89,18 @@ class Renderer:
             self.draw_edge(*edge)
         return self
 
+    def draw_solution_left(self, sol: ioformats.Solution):
+        self.draw_unit_square()
+        for f in sol.facets:
+            self.draw_poly([sol.orig_points[i] for i in f])
+        return self
+
+    def draw_solution_right(self, sol: ioformats.Solution):
+        self.draw_unit_square()
+        for f in sol.facets:
+            self.draw_poly([sol.dst_points[i] for i in f])
+        return self
+
     def get_img(self, size=None):
         if size:
             self.size = size
@@ -124,6 +137,13 @@ class Renderer:
         )
 
 
+def render_solution(sol: ioformats.Solution, size=100):
+    return hstack_images(
+        Renderer().draw_solution_left(sol).get_img(size),
+        Renderer().draw_solution_right(sol).get_img(size),
+    )
+
+
 def render_polys_and_edges(
         polys: List[List[Point]],
         edges: List[Tuple[Point, Point]],
@@ -139,12 +159,18 @@ def render_polys_and_edges(
 
 
 def hstack_images(im1, im2):
-    #print(im1.size)
-    assert im1.size[1] == im2.size[1]
-    #return im1
-    im = Image.new('RGBA', (im1.size[0] + im2.size[0], im1.size[1]))
+    im = Image.new(
+        'RGBA', (im1.size[0] + im2.size[0], max(im1.size[1], im2.size[1])))
     im.paste(im1, (0, 0) + im1.size)
-    im.paste(im2, (im1.size[0], 0, im1.size[0] + im2.size[0], im1.size[1]))
+    im.paste(im2, (im1.size[0], 0, im1.size[0] + im2.size[0], im2.size[1]))
+    return im
+
+
+def vstack_images(im1, im2):
+    im = Image.new(
+        'RGBA', (max(im1.size[0], im2.size[0]), im1.size[1] + im2.size[1]))
+    im.paste(im1, (0, 0) + im1.size)
+    im.paste(im2, (0, im1.size[1], im2.size[0],  im1.size[1] + im2.size[1]))
     return im
 
 
