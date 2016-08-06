@@ -37,7 +37,7 @@ ticks = 0
 # conf:
 
 fetched_qty = 1000
-missed_ids = [ ]
+missed_ids = [ 1776 ]
 
 #
 ##########

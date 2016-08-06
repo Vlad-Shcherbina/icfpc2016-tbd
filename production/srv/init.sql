@@ -21,15 +21,15 @@ CREATE TABLE IF NOT EXISTS requests (
 CREATE TABLE IF NOT EXISTS quotas (
 	 endpoint		endpoint				 NOT NULL PRIMARY KEY
 	,quota			int						 	 NOT NULL DEFAULT(1000)
-)
+);
 
 CREATE TABLE IF NOT EXISTS last_stamp (
    id          int             NOT NULL PRIMARY KEY DEFAULT(1)
   ,tau         bigint
-)
+);
 
-INSERT INTO quotas (endpoint) VALUES ('hello')
-INSERT INTO quotas (endpoint) VALUES ('blob')
-INSERT INTO quotas (endpoint) VALUES ('snapshot/list')
-INSERT INTO quotas (endpoint) VALUES ('problem/submit')
-INSERT INTO quotas (endpoint) VALUES ('solution/submit')
+INSERT INTO quotas (endpoint) VALUES ('hello');
+INSERT INTO quotas (endpoint) VALUES ('blob');
+INSERT INTO quotas (endpoint) VALUES ('snapshot/list');
+INSERT INTO quotas (endpoint) VALUES ('problem/submit');
+INSERT INTO quotas (endpoint) VALUES ('solution/submit');
