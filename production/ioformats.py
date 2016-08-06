@@ -64,7 +64,7 @@ def parse_problem(s: str) -> Problem:
 
 def get_root() -> Path:
     return Path(__file__).resolve().parent / '..'
-    
+
 
 def load_problem(name: str) -> Problem:
     with (get_root() / 'problems' / '{}.txt'.format(name)).open('r') as f:
@@ -85,6 +85,28 @@ def solution_to_str(sol: Solution) -> str:
         lines.append('{},{}'.format(pt.x, pt.y))
 
     return '\n'.join(lines)
+
+
+def parse_solution(s: str) -> Problem:
+    lines = iter(line for line in s.splitlines() if line.strip())
+
+    num_points = int(next(lines))
+    orig_points = []
+    for _ in range(num_points):
+        orig_points.append(parse_point(next(lines)))
+
+    num_facets = int(next(lines))
+    facets = []
+    for _ in range(num_facets):
+        facet = list(map(int, next(lines).split()))
+        assert facet[0] == len(facet) - 1
+        facets.append(facet[1:])
+
+    dst_points = []
+    for _ in range(num_points):
+        dst_points.append(parse_point(next(lines)))
+
+    return Solution(orig_points, facets, dst_points)
 
 
 def center_problem(problem: Problem) -> Problem:

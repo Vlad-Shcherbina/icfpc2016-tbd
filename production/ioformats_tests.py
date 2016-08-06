@@ -5,7 +5,7 @@ import textwrap
 from fractions import Fraction
 from production.cg import Point
 from production.ioformats import parse_problem, Problem, load_problem, \
-    Solution, solution_to_str
+    Solution, solution_to_str, parse_solution
 
 
 def test_problem_parser():
@@ -106,6 +106,7 @@ def test_solution_to_str():
     1/2,1/2
     0,1/2''')
     assert(solution_to_str(solution) == expected_string)
+    assert(parse_solution(expected_string) == solution)
 
 if __name__ == '__main__':
     import sys, logging, pytest
