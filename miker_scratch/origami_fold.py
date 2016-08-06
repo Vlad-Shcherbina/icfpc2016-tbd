@@ -70,6 +70,7 @@ Polygon = NamedTuple('Polygon', [('edges', List[Edge])])
 class Polygon(Polygon):
 		
 	transform = cg.AffineTransform.identity()
+	inv = False
 		
 	# def __init__(self, *args, **kwargs):
 		# if 'transform' in kwargs:
@@ -131,7 +132,7 @@ class Polygon(Polygon):
 		
 		
 		
-def fold(polys, e_dis):
+def fold(polys, e_dis, dir=0):
 	ret_polys = []
 	for poly in polys:
 		ret = poly.dissect(e_dis)
@@ -140,12 +141,49 @@ def fold(polys, e_dis):
 			continue
 			
 		poly1, poly2 = ret
-		poly2.transform = poly2.transform @ cg.AffineTransform.mirror(*e_dis)
+		poly_to_transform = ret[dir if not poly.inv else (1-dir)]
+		poly_to_transform.transform = poly_to_transform.transform @ cg.AffineTransform.mirror(*e_dis)
+		poly_to_transform.inv = not poly_to_transform.inv
 		
 		ret_polys.append(poly1)
 		ret_polys.append(poly2)
 	
 	return ret_polys
+	
+	
+def point_to_str(p):
+	return ','.join([str(x) for x in p])
+
+def write_fold(polys, f):
+	d = {}  # point -> polygon
+	pp = [] # list of polygon point ids
+	i = 0
+	for poly in polys:
+		ppi = []
+		pp.append(ppi)
+		for p in reversed(list(polygon_points(poly))):
+			if p not in d:
+				d[p] = (poly, i)
+				i += 1
+			ppi.append(d[p][1])
+					
+	points = [(p, poly.transform.transform(p)) for p, (poly, i) in d.items()]  # (src, dest) points pairs
+	points_src, points_dst = tuple(zip(*points))
+	
+	f.write('%d\n' % len(points))		# number of points
+	for p in points_src:				# source point coords
+		f.write(point_to_str(p)); f.write('\n')
+		
+	f.write('%d\n' % len(polys))		# number of polygons
+	for ppi in pp:
+		f.write('%d ' % len(ppi))
+		f.write(' '.join(map(str, ppi)))
+		f.write('\n')
+					
+	for p in points_dst:				# destination point coords
+		f.write(point_to_str(p)); f.write('\n')
+	
+	
 
 
 def make_point(t):
@@ -179,8 +217,11 @@ pnts_unitsq = make_points([
 unitsq = make_poly(pnts_unitsq)
 
 
+def polygon_points(poly):
+	return map(lambda e:e.p1, poly.edges)
+
 def polygon_to_set(poly):
-	return frozenset(map(lambda e:e.p1, poly.edges))
+	return frozenset(polygon_points(poly))
 	
 def polygons_to_set(polys):
 	return frozenset(map(polygon_to_set, polys))
