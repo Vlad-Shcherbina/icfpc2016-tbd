@@ -119,7 +119,7 @@ class Polygon(Polygon):
 		ps = []
 		for e in self.edges:
 			p = e.intersects_with_line(e_dis)
-			if p is None:
+			if p is None:  # coincidence with the edge
 				return False
 			if p:
 				ps.append((p, e))
@@ -129,6 +129,9 @@ class Polygon(Polygon):
 			
 		p1, e1 = ps[0]
 		p2, e2 = ps[1]
+		
+		if p1 == p2:
+			return False
 		
 		es1, es2 = [], []
 		es = es1

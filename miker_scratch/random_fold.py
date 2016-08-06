@@ -79,7 +79,7 @@ if __name__ == '__main__':
 	
 	rfl = RandomFolder(**{k: v for k, v in args.items() if v is not None})
 	fold = rfl.random_fold()
-	write_fold(fold)
+	write_fold(fold)		
 	
 	if png_path:
 		from production.render import render_polys_and_edges
