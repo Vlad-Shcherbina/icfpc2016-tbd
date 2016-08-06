@@ -95,11 +95,6 @@ class Polygon(Polygon):
 		p1, e1 = ps[0]
 		p2, e2 = ps[1]
 		
-		# if p1 == p2:
-			# return False
-		
-		print(ps)
-		
 		es1, es2 = [], []
 		es = es1
 		for e in self.edges:

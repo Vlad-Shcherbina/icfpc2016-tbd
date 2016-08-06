@@ -22,8 +22,9 @@ class RandomFolder(types.SimpleNamespace):
 		t = (r(), r())
 		return Edge(*t)
 		
-	def random_fold(self):
-		polys = [unitsq]
+	def random_fold(self, polys=None):
+		if polys is None:
+			polys = [unitsq]
 		count = self.count
 		while len(polys) < count:
 			e = None
@@ -31,3 +32,15 @@ class RandomFolder(types.SimpleNamespace):
 				e = self.random_line()
 			polys = fold(polys, e)
 		return polys
+		
+		
+if __name__ == '__main__':
+	import argparse
+	parser = argparse.ArgumentParser(description='Random fold generator.')
+	parser.add_argument('-n', '--count', metavar='N', dest="count", type=int, help='target polygon count (not less than)')
+	args = parser.parse_args()
+	
+	rfl = RandomFolder(**{k: v for k, v in args.__dict__.items() if v is not None})
+	fold = rfl.random_fold()
+	write_fold(fold)
+	
