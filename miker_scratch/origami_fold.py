@@ -65,6 +65,9 @@ class Edge(Edge):
 		ax = a.x; ay = a.y
 		return ax == 0 and ay == 0
 		
+	def point_side(self, p):
+		return self.a.cross(self.p1 - p)
+		
 		
 Polygon = NamedTuple('Polygon', [('edges', List[Edge])])
 class Polygon(Polygon):
@@ -77,15 +80,35 @@ class Polygon(Polygon):
 	def inv(self):
 		return (self.t_number % 2 == 1)
 		
-	# def __init__(self, *args, **kwargs):
-		# if 'transform' in kwargs:
-			# self.transform = kwargs.pop('transform')
-		# super().__init__(*args, **kwargs)
+		
+	@property
+	def transform(self):
+		if hasattr(self, '_transform'):
+			pass
+		else:
+			self._transform = cg.AffineTransform.identity()
+		return self._transform
+		
+	@transform.setter
+	def transform(self, t):
+		self._transform = t 
+		self.t_number += 1
+		if hasattr(self, '_trans_points'):
+			del self._trans_points
+		
+	@property
+	def trans_points(self):
+		if hasattr(self, '_trans_points'):
+			pass
+		else:
+			t = self.transform
+			self._trans_points = [t.transform(p) for p in polygon_points(self)]
+		return self._trans_points 
 		
 	def dissect(self, e_dis):
 		# apply transform to dissector line
 		transform = self.transform
-		e_dis = e_dis.transform(transform)
+		e_dis = e_dis.transform(transform.inv())
 	
 		# find intersections with edges
 		ps = []
@@ -126,29 +149,50 @@ class Polygon(Polygon):
 		def spawn_polygon(es):
 			poly = Polygon(es)
 			poly.transform = transform
+			poly.t_number = self.t_number
 			return poly
 		
-		return spawn_polygon(es1), spawn_polygon(es2)
+		ret = (spawn_polygon(es1), spawn_polygon(es2))
+		#~ 
+		#~ if side(polygon_points(ret[0]), e_dis) > 0:
+			#~ return (ret[1], ret[0])
+		#~ else: 
+			#~ return ret
+		return ret
 		
-		
-		
+	
 def fold(polys, e_dis, dir=0):
+		
+	this_transform = cg.AffineTransform.mirror(*e_dis)
+	
+	#~ def apply_this_transform(poly):
+		#~ poly.transform = this_transform @ poly.transform
+		
 	ret_polys = []
 	for poly in polys:
 		ret = poly.dissect(e_dis)
 		if not ret:
+			if side(poly.trans_points, e_dis) < 0:
+				poly.transform = this_transform @ poly.transform
 			ret_polys.append(poly)
 			continue
 			
 		poly1, poly2 = ret
-		poly_to_transform = ret[dir if not poly.inv else (1-dir)]
-		poly_to_transform.transform = poly_to_transform.transform @ cg.AffineTransform.mirror(*e_dis)
-		poly_to_transform.t_number += 1
+		poly_to_transform = poly1 if side(poly1.trans_points, e_dis) < 0 else poly2 #ret[dir if not poly.inv else (1-dir)]
+		poly_to_transform.transform = this_transform @ poly_to_transform.transform
 		
 		ret_polys.append(poly1)
 		ret_polys.append(poly2)
 	
 	return ret_polys
+
+	
+def side(pp, e):  # we assume it's all on one side
+	for p in pp:
+		ret = e.point_side(p)
+		if ret != 0:
+			return ret
+	return 0
 	
 	
 def point_to_str(p):
