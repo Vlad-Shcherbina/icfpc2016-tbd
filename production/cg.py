@@ -105,6 +105,11 @@ class AffineTransform:
         offset = self.mat.transform(other.offset) + self.offset
         return AffineTransform(mat, offset)
 
+    def inv(self):
+        m_inv = self.mat.inv()
+        offset_inv = m_inv.transform(self.offset) * -1
+        return AffineTransform(m_inv, offset_inv)
+
     @staticmethod
     def align(pre1: Point, pre2: Point,
               post1: Point, post2: Point) -> 'AffineTransform':

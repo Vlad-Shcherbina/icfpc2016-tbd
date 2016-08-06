@@ -44,6 +44,14 @@ def test_mat2_ops():
     assert m.transform(Point(10, 1)) == Point(23, 1)
 
 
+def test_affine_transform():
+    t = AffineTransform(Mat2([[13, 1], [2, 9]]), Point(1, 3))
+    print(t)
+    print(t.inv())
+    assert t @ t.inv() == AffineTransform.identity()
+    assert t.inv() @ t == AffineTransform.identity()
+
+
 @pytest.mark.parametrize('pre1,pre2,post1,post2', [
     (Point(0, 0), Point(1, 0),
      Point(0, 0), Point(2, 0)),
