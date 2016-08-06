@@ -13,13 +13,13 @@ def test_everything():
     im2 = Renderer().draw_problem(p).get_img(size=100)
 
     im = hstack_images(im1, im2)
-    im.save('test_renderer.png')
+    #im.save('test_renderer.png')
 
 
 def test_legacy_render_polys_and_edges():
     p = ioformats.load_problem('00042')
     im = render_polys_and_edges(p.silhouette, p.skeleton)
-    im.save('test_render_polys_and_edges.png')
+    #im.save('test_render_polys_and_edges.png')
 
 
 def test_hstack_images():
@@ -30,7 +30,7 @@ def test_hstack_images():
     im2 = render_polys_and_edges(p.silhouette, p.skeleton)
 
     im = hstack_images(im1, im2)
-    im.save('test_hstack_images.png')
+    #im.save('test_hstack_images.png')
 
 
 if __name__ == '__main__':

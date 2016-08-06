@@ -97,9 +97,15 @@ class Renderer:
         self.min_y = min(p.y for p in self.points_for_viewport)
         self.max_y = max(p.y for p in self.points_for_viewport)
 
-        # TODO: ensure 1:1 ratio
-        #w = self.max_x - self.min_x
-        #h = self.max_y - self.min_y
+        w = self.max_x - self.min_x
+        h = self.max_y - self.min_y
+
+        # ensure 1:1 ratio
+        d = (w - h) / 2
+        self.min_y -= max(d, 0)
+        self.max_y += max(d, 0)
+        self.min_x -= max(-d, 0)
+        self.max_x += max(-d, 0)
 
         im = Image.new('RGBA', (self.size, self.size))
         for draw_command in self.draw_commands:
