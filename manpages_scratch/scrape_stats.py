@@ -22,21 +22,34 @@ def loadJson(x):
     with open(x) as f:
         return json.load(f)
 
-#r = getSnaps()
-#snaps = json.loads(r.text)
+r = getSnaps()
+snaps = json.loads(r.text)
 
-#snap = snaps['snapshots'][-1]['snapshot_hash']
+snap = snaps['snapshots'][-1]['snapshot_hash']
 
-#sleep(1)
+sleep(1)
 
-#r      = getBlob(snap)
+r = getBlob(snap)
 #print(r.text)
+d = json.loads(r.text)
 
-d = loadJson('stats_24.txt')
+#d = loadJson('stats_24.txt')
 
 crunch = []
 
+solved_problems = [1,2,3,4,5,6,7,8,9,10,
+                   11,12,13,14,15,16,17,18,
+                   25,27,
+                   36,37,38,39,
+                   40,42,43,44,45,46,47,48,49,
+                   50,53,55,56,57,58,59,
+                   62,63,
+                   83]
+
 for problem in d['problems']:
+
+    if not problem['problem_id'] in solved_problems:
+        continue
 
     ones = 0
     size_ones = 0
