@@ -34,9 +34,9 @@ def loadJson(x):
 
 d = loadJson('stats_24.txt')
 
+crunch = []
+
 for problem in d['problems']:
-    pprint(problem['problem_id'])
-    pprint(problem['problem_size'])
 
     ones = 0
     size_ones = 0
@@ -51,9 +51,8 @@ for problem in d['problems']:
             partials += 1
             size_partials += res['solution_size']
 
-    pprint(ones)
-    pprint(size_ones)
-    pprint(partials)
-    pprint(size_partials)
+    crunch.append({'ones': (ones, size_ones), 'partials': (partials, size_partials), 'id': problem['problem_id']})
 
-    pprint('===')
+scrunch = sorted(crunch, key=lambda x: x['ones'][0])
+
+pprint(scrunch)
