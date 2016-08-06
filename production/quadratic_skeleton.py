@@ -1,7 +1,7 @@
 from production import render
 from production.cg import Point
 from production import ioformats
-from miker_scratch.origami_fold import fold, write_fold, unitsq, Edge, polygon_points
+from production.origami_fold import fold, write_fold, unitsq, Edge, polygon_points
 from fractions import Fraction
 import random
 import itertools
