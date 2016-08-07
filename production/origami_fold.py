@@ -7,6 +7,7 @@ from typing import NamedTuple, List, Tuple, Optional
 # from memoized_property import memoized_property
 
 from fractions import Fraction
+from math import sqrt
 
 memoized_property = property
 
@@ -28,6 +29,10 @@ class Edge(Edge):
 	@memoized_property
 	def a(self):
 		return self.p2 - self.p1
+
+	@memoized_property
+	def length(self):
+		return sqrt((self.a).dot(self.a))
 		
 	def transform(self, at):
 		return Edge(at.transform(self.p1), at.transform(self.p2))
