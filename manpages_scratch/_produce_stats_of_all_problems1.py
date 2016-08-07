@@ -68,6 +68,4 @@ for problem in d['problems']:
                    'hours_ago': (time() - problem['publish_time']) / 3600})
 
 scrunch = sorted(crunch, key=lambda x: x['ones'][0])
-unsolved = list(filter((lambda x: x['ones'][0] == 0), scrunch))
-
-pprint(scrunch)
+pprint(list(map(lambda x: x['id'], scrunch)))
