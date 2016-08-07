@@ -279,6 +279,8 @@ def approx_angle(float_angles, start_loc, flip_locs, target_loc):
 
 
 def generate_span_templates(star, angle):
+    #if angle >= 1: print('star size', len(star))
+
     assert len(star) >= 2
 
     float_angles = []
@@ -287,14 +289,20 @@ def generate_span_templates(star, angle):
     assert math.isclose(sum(float_angles), 2 * math.pi)
     #print(float_angles)
 
+    cnt = 0
     for num_flips in range(4 + 1):
         if angle == 4 and num_flips % 2 == 1:
             continue
+#        if angle == 1: print(num_flips, len(star) ** (num_flips + 2))
         for flip_locs in itertools.product(range(len(star)), repeat=num_flips):
             if any(a == b for a, b in zip(flip_locs, flip_locs[1:])):
                 continue
             for start_loc, start in enumerate(star):
                 for target_loc in range(len(star)):
+                    cnt += 1
+                    #if cnt % 1000 == 0: print('cnt', cnt)
+                    if cnt > 1000000:
+                        return
 
                     s = approx_angle(float_angles, start_loc, flip_locs, target_loc)
                     if not math.isclose(s, math.pi / 2 * angle, abs_tol=1e-6):
