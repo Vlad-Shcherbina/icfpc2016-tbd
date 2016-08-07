@@ -23,7 +23,7 @@ def test_everything():
     ############
 
     sol_path = os.path.join(
-        os.path.dirname(__file__), '..', 'solutions', '025.txt')
+        os.path.dirname(__file__), '..', 'solutions', 'solved_00025.txt')
     with open(sol_path) as fin:
         sol = ioformats.parse_solution(fin.read())
 
