@@ -124,21 +124,26 @@ class Polygon(Polygon):
         e_dis = e_dis.transform(transform.inv())
     
         # find intersections with edges
-        ps = []
+        ps = [] 
+        pss = set()
         for e in self.edges:
             p = e.intersects_with_line(e_dis)
             if p is None:  # coincidence with the edge
-                return False
-            if p:
+                print('Coincident!')
+                return None
+            if p and p not in pss:
+                pss.add(p)
                 ps.append((p, e))
                 
         if len(ps) < 2: 
+            print('Too little points', ps)
             return False
             
         p1, e1 = ps[0]
         p2, e2 = ps[1]
         
         if p1 == p2:
+            print('Same point:', p1)
             return False
         
         es1, es2 = [], []
@@ -177,7 +182,10 @@ class Polygon(Polygon):
         #~ else: 
             #~ return ret
         return ret
-        
+
+
+def print_poly(poly):
+    print('SRC: {} TRANS: {}'.format(repr(list(polygon_points(poly))), repr(poly.trans_points)))
     
 def fold(polys, e_dis, ref_p=None):
     
@@ -194,10 +202,17 @@ def fold(polys, e_dis, ref_p=None):
     ret_polys = []
 
     for poly in polys:
+        print('Folding:')
+        print_poly(poly)
         ret = poly.dissect(e_dis)
         if not ret:
+            print('non-intersecting')
+            if ret is None:
+                print('coincident')
             if side(poly.trans_points, e_dis) == transform_side:
+                print('applying transform:')
                 poly.transform = this_transform @ poly.transform
+                print_poly(poly)
             ret_polys.append(poly)
             continue
             
@@ -205,6 +220,9 @@ def fold(polys, e_dis, ref_p=None):
         poly_to_transform = poly1 if side(poly1.trans_points, e_dis) == transform_side else poly2 #ret[dir if not poly.inv else (1-dir)]
         poly_to_transform.transform = this_transform @ poly_to_transform.transform
         
+        print('dissected:')
+        print_poly(poly1)
+        print_poly(poly2)
         ret_polys.append(poly1)
         ret_polys.append(poly2)
     
