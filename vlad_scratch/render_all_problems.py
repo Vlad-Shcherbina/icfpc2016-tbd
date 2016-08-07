@@ -24,7 +24,7 @@ def main():
                 continue
 
             im = render.render_polys_and_edges(
-                problem.silhouette, problem.skeleton)
+                problem.silhouette, problem.skeleton, size=200)
             im.save('{}.png'.format(m.group(1)))
 
 

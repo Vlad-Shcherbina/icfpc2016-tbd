@@ -2,7 +2,7 @@ import pprint
 import math
 
 from production import ioformats
-from production.meshes import Mesh
+from production.meshes import Mesh, TooHardError
 
 
 
@@ -22,6 +22,8 @@ def find_all_borders(mesh):
                 return
             if math.isclose(length, 1) and mesh.transitions[1].get(path[-1]):
                 borders.append(list(path))
+                if len(borders) > 1000:
+                    raise TooHardError('too many candidate borders')
                 return
 
             if len(path) > 50:
@@ -36,11 +38,50 @@ def find_all_borders(mesh):
 
     #pprint.pprint(starts)
     #pprint.pprint(borders)
-    print(len(borders), 'borders')
+    #print(len(borders), 'borders')
+    return borders
+
+
+def find_perimeters(mesh, borders):
+    def can_turn(e1, e2):
+        return e2 in mesh.transitions[1].get(e1, ())
+
+    cnt = 0
+    for b1 in borders:
+        for b2 in borders:
+            if not can_turn(b1[-1], b2[0]):
+                continue
+            if b1 > b2:
+                continue
+            for b3 in borders:
+                if not can_turn(b2[-1], b3[0]):
+                    continue
+                for b4 in borders:
+                    if not can_turn(b3[-1], b4[0]):
+                        continue
+                    if not can_turn(b4[-1], b1[0]):
+                        continue
+
+                    cnt += 1
+                    if cnt > 1000:
+                        raise TooHardError('too many candidate perimeters')
+
+                    points = set(sum(b1 + b2 + b3 + b4, ()))
+                    #print(points)
+                    bad = False
+                    for node in mesh.nodes:
+                        if node not in points and not mesh.span_templates[node, 4]:
+                            bad = True
+                            break
+                    if bad:
+                        #print('bad')
+                        continue
+
+                    yield (b1, b2, b3, b4)
 
 
 def main():  # pragma: no cover
-    p = ioformats.load_problem('00077')
+    p = ioformats.load_problem('00018')
 
     m = Mesh(p)
     m.debug_print()
@@ -58,7 +99,10 @@ def main():  # pragma: no cover
     r.get_img(200).save('mesh.png')
 
     print('*' * 20)
-    find_all_borders(m)
+    borders = find_all_borders(m)
+    print(len(borders), 'borders')
+    perimeters = list(find_perimeters(m, borders))
+    print(len(perimeters), 'perimeters')
 
 
 if __name__ == '__main__':

@@ -10,6 +10,10 @@ from production import ioformats
 from production import render
 
 
+class TooHardError(Exception):
+    pass
+
+
 def subdivide_edges(
         edges: List[Tuple[Point, Point]]) -> List[Tuple[Point, Point]]:
     """
@@ -228,6 +232,7 @@ class Mesh:
         self.span_templates = {}
         for node in self.nodes:
             star = self.get_node_star(node)
+            has_any = False
             for angle in 1, 2, 4:
                 self.span_templates[node, angle] = list(
                     generate_span_templates(star, angle, self.get_forbidden_idx(node)))
@@ -236,6 +241,7 @@ class Mesh:
                     continue
 
                 for st in self.span_templates[node, angle]:
+                    has_any = True
                     if angle == 1:
                         self.corners.add(node)
 
@@ -252,6 +258,9 @@ class Mesh:
                         bone1 = self.bones_by_node[node][e1][::-1]
                         bone2 = self.bones_by_node[node][e2]
                         self.transitions[angle].setdefault(bone1, set()).add(bone2)
+
+            if not has_any:
+                raise TooHardError('no spans for a node')
 
 
 def match_angle(start, finish, angle):
@@ -333,7 +342,7 @@ def generate_span_templates_internal(star, angle, forbidden_idx):
                 for target_loc in range(len(star)):
                     cnt += 1
                     #if cnt % 1000 == 0: print('cnt', cnt)
-                    if cnt > 200000:
+                    if cnt > 20000:
                         return
 
                     idxes = enumerate_idx(
@@ -364,7 +373,7 @@ def generate_span_templates_internal(star, angle, forbidden_idx):
                         while True:
                             if i == 0 and idx == flip_loc:
                                 break
-                            
+
                             if dir > 0:
                                 span.append((dir, idx))
                             idx += dir
