@@ -23,16 +23,18 @@ def convex_hull(points_list):
 
     lower = []
     for p in points_sorted:
+        x,y = p
         while len(lower) >= 2 and (lower[-1] - lower[-2]).cross(p - lower[-2]) <= 0:
             lower.pop()
-        lower.append(p)
+        lower.append(cg.Point(cg.Fraction(x), cg.Fraction(y)))
 
     upper = []
     for p in reversed(points_sorted):
+        x,y = p
         while len(upper) >= 2 and (upper[-1] - upper[-2]).cross(p - upper[-2]) <= 0:
             upper.pop()
 
-        upper.append(p)
+        upper.append(cg.Point(cg.Fraction(x), cg.Fraction(y)))
 
     # Throw away the last point of each half-hull as it's repeated at the beginning of the other one. 
     return lower[:-1] + upper[:-1]
@@ -40,6 +42,22 @@ def convex_hull(points_list):
 # fold_to_convex_hull :: [polygon] -> convex hull edges -> [polygon]
 # fold_to_convex_hull :: [[Point]] -> [Edge] -> [Polygon]
 def fold_to_convex_hull(polys, hull_edges, folded_polys=1):
+    i = 0
+    l = len(hull_edges)
+    for e in hull_edges:
+        polys = of.fold(polys, e, cg.Point(cg.Fraction(1,2), cg.Fraction(1,2)))
+        next_e = hull_edges[i+1 if i < (l-1) else 0]
+        ref_p = next_e.p1
+        print(str(folded_polys) + '-' + str(i+1))
+        if i == 0 and folded_polys == 8:
+            print (polys)
+            print(e)
+            print(ref_p)
+        polys = of.fold(polys, e, ref_p)
+        trpts = [p.trans_points for p in polys]
+        visualise(trpts, str(folded_polys) + '-' + str(i+1) + 'partial')
+        i += 1
+
     for e in hull_edges:
         polys = of.fold(polys, e, cg.Point(cg.Fraction(1,2), cg.Fraction(1,2)))
     if len(polys) > folded_polys:
