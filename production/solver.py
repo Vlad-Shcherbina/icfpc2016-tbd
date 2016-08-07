@@ -3,6 +3,7 @@
 import os, sys
 import pprint
 from typing import NamedTuple, Tuple, Dict, List
+import random
 
 from production import cg
 from production.cg import Point
@@ -47,6 +48,7 @@ class Solver:
 
         self.facets = meshes.reconstruct_facets(p)
         self.facets = meshes.keep_real_facets(self.facets, p)
+        random.shuffle(self.facets)
 
         self.facet_idx_by_edge = {}
         for facet_idx, facet in enumerate(self.facets):
