@@ -3,6 +3,8 @@ import json
 from pprint import pprint
 from production.ioformats import get_problem_file
 
+from production.solution_runner import get_solution_file
+
 map_hash_to_ids, map_id_to_hash = None, None 
 def load_mapping():
     global map_hash_to_ids, map_id_to_hash
@@ -23,7 +25,7 @@ def to_solution_file(x):
     return five_digits_to_solution_file(to_five_digits(x))
 
 def five_digits_to_solution_file(five_digits):
-    return str(get_problem_file(five_digits).resolve())
+    return str(get_solution_file(five_digits).resolve())
 
 def find_original_solution_file(problem_id):
     maybe_orig = find_original_solution(problem_id)
