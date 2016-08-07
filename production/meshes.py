@@ -168,6 +168,7 @@ class Mesh:
             bones.sort(key=lambda bone: cg.rational_angle(bone[1] - bone[0]))
 
 
+        self.nodes = nodes
         self.bones_by_node = bones_by_node
         self.left_fragment_by_bone = left_fragment_by_bone
         self.right_fragment_by_bone = right_fragment_by_bone
@@ -198,12 +199,20 @@ class Mesh:
         return r
 
 
+def generate_span_templates(star, angle):
+    pass
+
+
 def main():  # pragma: no cover
     p = ioformats.load_problem('00025')
 
     m = Mesh(p)
     m.debug_print()
     m.render().get_img(200).save('mesh.png')
+
+    for node in m.nodes:
+        print(node, m.describe_node(node))
+
     return
 
     facets = reconstruct_facets(p)
