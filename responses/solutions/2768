@@ -1,2 +1,0 @@
-{"res": {"resemblance": 1.0, "solution_size": 85, "problem_id": 2768, "solution_spec_hash": "486b8dced911b74c8f425f4cb8b44f9cf06dca0e", "ok": true}, "req": "8\n0,0\n0,1\n1/8,1\n1/8,0\n7/8,1\n1,1\n1,0\n7/8,0\n3\n4 0 1 2 3\n4 4 5 6 7\n4 2 4 7 3\n1/8,0\n1/8,1\n0,1\n0,0\n3/4,1\n5/8,1\n5/8,0\n3/4,0"}
-
