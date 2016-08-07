@@ -3,7 +3,7 @@ from production import origami_fold as of
 
 from production import api_wrapper as aw
 
-from production.convex_hull import fold_to_convex_hull, convex_hull, visualise
+from ix_scratch.convex_hull import fold_to_convex_hull, convex_hull, visualise
 
 import argparse
 
@@ -67,4 +67,3 @@ if __name__ == '__main__':
     for p in problems:
         prob = '{0:05d}'.format(p)
         compute_approximate_solution(prob)
-
