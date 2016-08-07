@@ -1,6 +1,3 @@
-def find_original_solution(problem_id):
-
-
 def main():
 	return
 
