@@ -94,7 +94,9 @@ def submit_problem(publish_time, solution_spec_file):
             json.dump(dat, f)
             f.write('\n\n')
         return r
-    elif r.status_code == 429:
+    elif r.status_code > 499 and r.status_code < 600: # dolbimsya bystro
+        return submit_problem(publish_time, solution_spec_file)
+    elif r.status_code == 429:                        # dolbimsya uporno
         sleep(1)
         return submit_problem(publish_time, solution_spec_file)
     else:
@@ -128,10 +130,10 @@ def submit_solution(problem_id, solution_spec, file=False):
     elif r.status_code == 429:
         sleep(1)
         return submit_solution(problem_id, solution_spec)
-    elif r.status_code == 502:
-        print('Server returned 502, sleeping', file=sys.stderr)
+    elif r.status_code > 499 and r.status_code < 600: # dolbimsya bystro
+        print('Server returned 5xx, sleeping', file=sys.stderr)
         sys.stderr.flush()
-        sleep(10)
+        sleep(1)
         return submit_solution(problem_id, solution_spec)
     elif r.status_code == 400:
         raise ServerRejectedError(r.json()['error']) 
