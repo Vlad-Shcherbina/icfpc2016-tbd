@@ -1,0 +1,4 @@
+{"res": {"ok": true, "problem_id": 3, "resemblance": 0.142857, "solution_spec_hash": "d141fbf7b43b4107082cc072a852db13ca920605", "solution_size": 31}, "req": "4\n0,0\n0,1\n1,1\n1,0\n1\n4 0 1 2 3\n0,0\n0,1\n1,1\n1,0"}
+
+{"req": "4\n0,0\n0,1\n1,1\n1,0\n1\n4 0 1 2 3\n-1/2,-1/2\n-1/2,1/2\n1/2,1/2\n1/2,-1/2", "res": {"solution_spec_hash": "fca11e29184d037d337c970e5b4952c10fdaf795", "resemblance": 1.0, "problem_id": 3, "solution_size": 51, "ok": true}}
+

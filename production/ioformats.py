@@ -119,7 +119,7 @@ def parse_solution(s: str) -> Solution:
 
 
 def center_problem(problem: Problem) -> Problem:
-    sx, sy, cnt = 0, 0, 0
+    sx, sy, cnt = Fraction(0), Fraction(0), 0
     for f in problem.silhouette:
         for p in f:
             sx += p.x

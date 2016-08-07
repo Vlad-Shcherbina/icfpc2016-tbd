@@ -23,16 +23,18 @@ def convex_hull(points_list):
 
     lower = []
     for p in points_sorted:
+        x,y = p
         while len(lower) >= 2 and (lower[-1] - lower[-2]).cross(p - lower[-2]) <= 0:
             lower.pop()
-        lower.append(p)
+        lower.append(cg.Point(cg.Fraction(x), cg.Fraction(y)))
 
     upper = []
     for p in reversed(points_sorted):
+        x,y = p
         while len(upper) >= 2 and (upper[-1] - upper[-2]).cross(p - upper[-2]) <= 0:
             upper.pop()
 
-        upper.append(p)
+        upper.append(cg.Point(cg.Fraction(x), cg.Fraction(y)))
 
     # Throw away the last point of each half-hull as it's repeated at the beginning of the other one. 
     return lower[:-1] + upper[:-1]
