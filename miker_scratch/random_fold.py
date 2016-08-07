@@ -45,21 +45,21 @@ class RandomFolder(types.SimpleNamespace):
 		i = 0
 		while len(polys) < count:
 			e = None
-			while not e or e.is_zero:
+			while not e or e.is_zero or e.point_side(center_point) == 0:
 				#~ e = self.random_hline() if i % 2 == 0 else self.random_vline()
 				e = self.random_line() 
 			
 			i += 1
-			polys = fold(polys, e)
+			polys = fold(polys, e, center_point)
 			
 			# take a point and offset all transforms to make it a center
-			p = polys[0].trans_points[0]
-			offs = p - center_point
-			
-			for poly in polys:
-				t = poly.transform
-				t.offset -= offs
-				poly.transform = t
+			#~ p = polys[0].trans_points[0]
+			#~ offs = p - center_point
+			#~ 
+			#~ for poly in polys:
+				#~ t = poly.transform
+				#~ t.offset -= offs
+				#~ poly.transform = t
 			
 		return polys
 		

@@ -15,6 +15,9 @@ memoized_property = property
 
 def mult_vector(p, n):
     return Point(p.x * n, p.y * n)
+    
+def sgn(x):
+    return 0 if x == 0 else (-1 if x < 0 else 1)
 
 Edge = NamedTuple('Edge', [('p1', Point), ('p2', Point)])
 class Edge(Edge):
@@ -76,7 +79,7 @@ class Edge(Edge):
         return ax == 0 and ay == 0
         
     def point_side(self, p):
-        return self.a.cross(self.p1 - p)
+        return sgn(self.a.cross(self.p1 - p))
         
         
 Polygon = NamedTuple('Polygon', [('edges', List[Edge])])
@@ -176,24 +179,29 @@ class Polygon(Polygon):
         return ret
         
     
-def fold(polys, e_dis, dir=0):
+def fold(polys, e_dis, ref_p=None):
+    
+    """ ref_p marks the side of the line where disected polygon remains untransformed """
+    
+    if ref_p:
+        transform_side = - e_dis.point_side(ref_p)
+        assert transform_side != 0
+    else:
+        transform_side = -1
         
     this_transform = cg.AffineTransform.mirror(*e_dis)
     
-    #~ def apply_this_transform(poly):
-        #~ poly.transform = this_transform @ poly.transform
-        
     ret_polys = []
     for poly in polys:
         ret = poly.dissect(e_dis)
         if not ret:
-            if side(poly.trans_points, e_dis) < 0:
+            if side(poly.trans_points, e_dis) == transform_side:
                 poly.transform = this_transform @ poly.transform
             ret_polys.append(poly)
             continue
             
         poly1, poly2 = ret
-        poly_to_transform = poly1 if side(poly1.trans_points, e_dis) < 0 else poly2 #ret[dir if not poly.inv else (1-dir)]
+        poly_to_transform = poly1 if side(poly1.trans_points, e_dis) == transform_side else poly2 #ret[dir if not poly.inv else (1-dir)]
         poly_to_transform.transform = this_transform @ poly_to_transform.transform
         
         ret_polys.append(poly1)
@@ -297,3 +305,4 @@ def compare_folds(f1, f2):
         return True
     
     return (s1 - s2), (s2 - s1)
+
