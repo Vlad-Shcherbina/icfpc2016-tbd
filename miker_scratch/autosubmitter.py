@@ -32,7 +32,9 @@ def main(for_real=False):
 	for ts in range(min_ts, max_ts, ts_step):
 		while True:
 			polys = next(g)
-			print(len(polys))
+			print('.')
+			
+			
 			with open(tmp_fname, 'w') as f:
 				write_fold(polys, f)
 				
