@@ -208,13 +208,16 @@ def list_problems():
 
 
 def list_hard_problems():
+    ps = set(list_problems())
     result = []
     with (get_root() / 'manpages_scratch' / 'all_problems.txt').open() as fin:
         for line in fin:
             m = re.match(r'\s+(\d+)\s+\d+\s+\d+\s+\d+', line)
             if m is not None:
                 #print(m.group(1))
-                result.append('{:05}'.format(int(m.group(1))))
+                p = '{:05}'.format(int(m.group(1)))
+                if p in ps:
+                    result.append(p)
     return result
 
 
