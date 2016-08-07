@@ -21,7 +21,7 @@ def evaluate_strings(probs, sols, sol_num=None):
     if sol_num is not None:
         print('Evaluating solution #%s' % sol_num)
   
-    sol = parse_solution(sols)
+    sol = ioformats.parse_solution(sols)
 
     prob = ioformats.parse_problem(probs)
     
