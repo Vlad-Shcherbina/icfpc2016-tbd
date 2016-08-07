@@ -5,11 +5,13 @@ d = {}
 
 with open('_problem_hashes') as f:
     for x in f:
+        print('.')
         xs = x.split('  ')
         i  = (xs[1].split('.'))[0]
         if not (xs[0] in d):
             d[xs[0]] = [i]
         else:
             d[xs[0]].append(i)
+        print(len(d))
 
 print(json.dumps(d))

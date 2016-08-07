@@ -3,7 +3,7 @@ set -x
 git pull origin master -f
 python3 scrape_maps.py
 (for x in 0*txt; do sha224sum $x; done) > _problem_hashes
-python3 jsonify_problem_hashes.py > _problem_hashes
+python3 jsonify_problem_hashes.py > __problem_hashes
 python3 hashify_problems.py
 cd ../manpages_scratch/
 python3 produce_stats_of_our_problems.py  > our_problems.txt
