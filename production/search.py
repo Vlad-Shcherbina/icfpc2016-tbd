@@ -86,11 +86,36 @@ def find_perimeters(mesh, borders):
                     yield (b1, b2, b3, b4)
 
 
+
+class Solver:
+    def __init__(self, mesh, perimeter):
+        self.mesh = mesh
+
+        self.allowed_by_node = {node: set() for node in mesh.nodes}
+
+        for node in mesh.nodes:
+            for q in mesh.span_templates[node, 4]:
+                for i in range(len(q)):
+                    q = q[1:] + q[:1]
+                    a = mesh.describe_span_template(node, q)
+                    for j in range(len(a)):
+                        for k in range(j + 1, len(a) + 1):
+                            self.allowed_by_node[node].add(tuple(a[j:k]))
+                    a = ['cycle'] + a + ['cycle']
+                    self.allowed_by_node[node].add(tuple(a))
+
+        pprint.pprint(self.allowed_by_node)
+
+        #for border in perimeter:
+        #    for i in range(len
+        #for node in mesh.node
+
+
 def main():  # pragma: no cover
-    p = ioformats.load_problem('00018')
+    p = ioformats.load_problem('00012')
 
     m = Mesh(p)
-    m.debug_print()
+    #m.debug_print()
     r = m.render()
 
     m.precompute_span_templates()
@@ -102,13 +127,24 @@ def main():  # pragma: no cover
         if s != 7:
             r.draw_text(node, str(s), color=(0, 0, 255))
 
-    r.get_img(200).save('mesh.png')
+    #r.get_img(200).save('mesh.png')
 
     print('*' * 20)
     borders = find_all_borders(m)
     print(len(borders), 'borders')
     perimeters = list(find_perimeters(m, borders))
     print(len(perimeters), 'perimeters')
+
+    perimeter = perimeters[0]
+
+    r = m.render()
+    for border in perimeter:
+        for edge in border:
+            r.draw_edge(*edge, color=(50, 50, 0))
+
+    r.get_img(200).save('perimeter.png')
+
+    solver = Solver(m, perimeter)
 
 
 if __name__ == '__main__':
