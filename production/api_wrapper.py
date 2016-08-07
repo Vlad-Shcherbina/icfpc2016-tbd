@@ -1,3 +1,4 @@
+import sys
 import time
 import requests
 
@@ -127,7 +128,9 @@ def submit_solution(problem_id, solution_spec, file=False):
     elif r.status_code == 429:
         sleep(1)
         return submit_solution(problem_id, solution_spec)
-    elif r.status_code == 402:
+    elif r.status_code == 502:
+        print('Server returned 502, sleeping', file=sys.stderr)
+        sys.stderr.flush()
         sleep(10)
         return submit_solution(problem_id, solution_spec)
     elif r.status_code == 400:

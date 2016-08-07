@@ -68,7 +68,7 @@ class SolutionDb(dict):
         self.write()
 
     def write(self):
-        with (self.directory / 'solution_db.txt').open('w') as f:
+        with self.db_file.open('w') as f:
             for p in sorted(self.values()):
                 f.write(', '.join(repr(it) for it in p))
                 f.write('\n')
@@ -77,7 +77,7 @@ class SolutionDb(dict):
     def validate(self, status):
         assert status.status in legit_statuses
         if status.status in (STATUS_SOLVED, STATUS_REJECTED):
-            assert (self.directory / status.file).exists() 
+            assert (self.db_file.parent / status.file).exists() 
         
 
     def update(self, sid, status, solver, data, note=''):
@@ -91,7 +91,7 @@ class SolutionDb(dict):
         filename = None
         if data is not None:
             filename = status + '_' + sid + '.txt'
-            with (self.directory / filename).open('w') as f:
+            with (self.db_file.parent / filename).open('w') as f:
                 f.write(data)
         self[sid] = ProblemStatus(sid, status, solver, filename, note)
         self.write()  

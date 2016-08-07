@@ -7,3 +7,7 @@ __pycache__/
 /responses/
 /solutions/rejected_*.txt
 /solutions/solution_db.txt
+/production/SOLUTION.png
+/production/stderr.txt
+/production/tmp/
+/production/solution_runner_stable.py
