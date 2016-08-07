@@ -395,6 +395,12 @@ class Solver:
 
         for s2 in successors:
             self.rec(s2)
+            
+    def run(self):
+        for state in self.gen_initial_states():
+            self.rec(state)
+            continue
+        
 
 
 def render_thingie(thingie):
@@ -446,12 +452,11 @@ def process_final_state(solv, state, solution_pipe=None):
     print(sol)
     print('-' * 20)
     
-
-    r = api_wrapper.s_submit_solution(int(solv.problem_id), sol)
-    print(r.text)
-
     if solution_pipe is not None:
         solution_pipe.send(sol)
+    else:
+        r = api_wrapper.s_submit_solution(int(solv.problem_id), sol)
+        print(r.text)
 
     print('SOLVED')
     exit()

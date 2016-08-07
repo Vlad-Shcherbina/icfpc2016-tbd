@@ -57,5 +57,8 @@ s2 = parse_solution('''9
 3/5,0
 6/11,35/33''')
 
+sv2 = SolutionViewer()
+sv2.show_and_wait(solution)
+
 while sv.show_and_wait(solution):
     solution = s2
