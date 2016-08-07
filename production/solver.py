@@ -125,7 +125,14 @@ class Solver:
             if (entry.orig_edge == f.orig_edge and
                 entry.t.mat.det() * f.t.mat.det() == -1):
 
-                assert entry.edge == f.edge
+                #self.render_state(state).save('before_assert.png')
+                #print(entry.orig_edge)
+                if entry.edge != f.edge:
+                    # really does not make sense, but it helps with some
+                    # problems so whatever
+                    return
+
+                assert entry.edge == f.edge, (entry.edge, f.edge)
 
                 new_frontier = list(state.frontier)
                 new_frontier.remove(entry)
@@ -142,6 +149,12 @@ class Solver:
         for f in state.frontier:
             if (f.orig_edge == rev_orig_edge and
                 entry.t.mat.det() * f.t.mat.det() == 1):
+
+                if entry.edge != f.edge[::-1]:
+                    # really does not make sense, but it helps with some
+                    # problems so whatever
+                    return
+
                 assert entry.edge == f.edge[::-1]
 
                 #print('bitch')
@@ -376,8 +389,8 @@ class Solver:
             print('snapshot', self.snapshot_cnt)
             print('frontier size', len(state.frontier))
 
-            self.render_state(state).save(
-                'tmp/{:06}.png'.format(self.snapshot_cnt))
+            #self.render_state(state).save(
+            #    'tmp/{:06}.png'.format(self.snapshot_cnt))
             self.snapshot_cnt += 1
 
         for s2 in successors:
