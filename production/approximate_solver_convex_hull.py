@@ -12,7 +12,10 @@ from time import sleep
 def compute_approximate_solution(i):
     print(i)
 
-    prob = ioformats.load_problem(i)
+    try:
+        prob = ioformats.load_problem(i)
+    except:
+        return
     p1 = prob.silhouette[0][0]
 
     prob = ioformats.center_problem(prob)
@@ -54,7 +57,8 @@ def compute_approximate_solution(i):
 if __name__ == '__main__':
     # 4461
     # problems = [989, 1456, 2606, 3560, 3852, 3854, 3929, 4008, 4010, 4229, 4236, 4239, 4861, 5195, 5199, 5293, 5311, 5724, 5726, 5907, 5933, 5949]
-    problems = [5195, 5199, 5293, 5311, 5724, 5726, 5907, 5949]
+    #problems = [5195, 5199, 5293, 5311, 5724, 5726, 5907, 5949]
+    problems = range(2666, 2666+100)
 
     #parser = argparse.ArgumentParser(description='Compute approximate solution')
     #parser.add_argument(dest='prob_id')
