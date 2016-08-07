@@ -2,6 +2,7 @@ import pprint
 from typing import List, Tuple
 from fractions import Fraction
 import itertools
+import math
 
 from production import cg
 from production.cg import Point
@@ -227,8 +228,42 @@ def match_angle(start, finish, angle):
         assert False, angle
 
 
+def approx_angle(float_angles, start_loc, flip_locs, target_loc):
+    s = 0
+    idx = start_loc
+    dir = 1
+    for flip_loc in flip_locs:
+        while True:
+            if dir > 0:
+                s += float_angles[idx]
+            idx += dir
+            idx %= len(float_angles)
+            if dir < 0:
+                s += float_angles[idx]
+
+            if idx == flip_loc:
+                break
+        dir = -dir
+
+    while idx != target_loc:
+        if dir > 0:
+            s += float_angles[idx]
+        idx += dir
+        idx %= len(float_angles)
+        if dir < 0:
+            s += float_angles[idx]
+    return s
+
+
 def generate_span_templates(star, angle):
     assert len(star) >= 2
+
+    float_angles = []
+    for pt1, pt2 in zip(star, star[1:] + star[:1]):
+        float_angles.append(math.atan2(pt1.cross(pt2), pt1.dot(pt2)) % (2 * math.pi))
+    assert math.isclose(sum(float_angles), 2 * math.pi)
+    #print(float_angles)
+
     for num_flips in range(4 + 1):
         if angle == 4 and num_flips % 2 == 1:
             continue
@@ -238,10 +273,9 @@ def generate_span_templates(star, angle):
             for start_loc, start in enumerate(star):
                 for target_loc in range(len(star)):
 
-                    #if (start_loc, flip_locs, target_loc) == (0, (2, 1, 3, 0), 0):
-                    #    print('*' * 10)
-                    #else:
-                    #    continue
+                    s = approx_angle(float_angles, start_loc, flip_locs, target_loc)
+                    if not math.isclose(s, math.pi / 2 * angle, abs_tol=1e-6):
+                        continue
 
                     span = []
 
@@ -312,6 +346,9 @@ def generate_span_templates(star, angle):
 
                         if angle == 4 and max(span) != span[0]:
                             continue
+
+                        s = approx_angle(float_angles, start_loc, flip_locs, target_loc)
+                        assert math.isclose(s, math.pi / 2 * angle)
                         yield span
 
 
