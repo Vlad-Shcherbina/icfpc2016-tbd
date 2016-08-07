@@ -91,29 +91,121 @@ def gen_point_in_facet(facet):
     assert False, facet
 
 
+def is_facet_real(facet, problem):
+    a = cg.polygon_area(facet)
+    assert a != 0
+    if a < 0:
+        return False
+
+    pt = gen_point_in_facet(facet)
+    cnt = 0
+    for silh_poly in problem.silhouette:
+        a = cg.polygon_area(silh_poly)
+        assert a != 0
+        cnt += cg.count_revolutions(pt, silh_poly)
+    assert cnt in (0, 1), cnt
+    return cnt == 1
+
+
 def keep_real_facets(facets, problem):
     result = []
     for facet in facets:
-        a = cg.polygon_area(facet)
-        assert a != 0
-        if a < 0:
-            continue
-
-        pt = gen_point_in_facet(facet)
-        cnt = 0
-        for silh_poly in problem.silhouette:
-            a = cg.polygon_area(silh_poly)
-            assert a != 0
-            cnt += cg.count_revolutions(pt, silh_poly)
-        assert cnt in (0, 1), cnt
-        if cnt:
+        if is_facet_real(facet, problem):
             result.append(facet)
 
     return result
 
 
+alphabet = 'ABCDEFGHKM'
+human_ids = []
+human_ids.extend(alphabet)
+human_ids.extend(
+    c1 + c2 for c1 in alphabet for c2 in alphabet)
+human_ids.extend(
+    c1 + c2 + c3 for c1 in alphabet for c2 in alphabet for c3 in alphabet)
+
+# inside this class, the vocabulary from
+# vlad_scratch/undead.md is used,
+# except that `reconstruct_facets` and `is_facet_real`
+# actually refer to *fragments* for historical reasons.
+class Mesh:
+    def __init__(self, p: ioformats.Problem):
+        fragments = reconstruct_facets(p)
+        fragment_ids = []
+        fragment_by_id = {}
+
+        for i, fragment in enumerate(fragments):
+            fragment_ids.append('{}_{}{}'.format(
+                human_ids[i],
+                len(fragment),
+                '' if is_facet_real(fragment, p) else '_virt'))
+            fragment_by_id[fragment_ids[-1]] = fragment
+
+        assert len(set(fragment_ids)) == len(fragment_ids)
+        #print(fragment_ids)
+
+        nodes = set.union(*map(set, fragments))
+        nodes = list(nodes)
+        nodes.sort()
+        #print(nodes)
+
+        bones_by_node = {}
+        left_fragment_by_bone = {}
+        right_fragment_by_bone = {}
+
+        for fragment_id, fragment in fragment_by_id.items():
+            for bone in zip(fragment, fragment[1:] + fragment[:1]):
+                t = bones_by_node.setdefault(bone[0], [])
+                assert bone not in t, t
+                t.append(bone)
+
+                assert bone not in left_fragment_by_bone
+                left_fragment_by_bone[bone] = fragment_id
+                assert bone[::-1] not in right_fragment_by_bone
+                right_fragment_by_bone[bone[::-1]] = fragment_id
+
+        for bones in bones_by_node.values():
+            bones.sort(key=lambda bone: cg.rational_angle(bone[1] - bone[0]))
+
+
+        self.bones_by_node = bones_by_node
+        self.left_fragment_by_bone = left_fragment_by_bone
+        self.right_fragment_by_bone = right_fragment_by_bone
+        self.fragment_by_id = fragment_by_id
+
+    def debug_print(self):
+        print('**** MESH *******')
+        print('bones_by_node')
+        pprint.pprint(self.bones_by_node)
+        print()
+        print('left_fragment_by_bone')
+        pprint.pprint(self.left_fragment_by_bone)
+        print()
+        print('right_fragment_by_bone')
+        pprint.pprint(self.right_fragment_by_bone)
+
+    def render(self):
+        r = render.Renderer()
+        r.points_for_viewport.clear()
+        for fragment_id, fragment in self.fragment_by_id.items():
+            if not fragment_id.endswith('_virt'):
+                r.draw_poly(fragment)
+
+            if cg.polygon_area(fragment) > 0:
+                center = sum(fragment, Point(0, 0)) / Fraction(len(fragment))
+                r.draw_text(center, fragment_id)
+
+        return r
+
+
 def main():  # pragma: no cover
-    p = ioformats.load_problem('problem95')
+    p = ioformats.load_problem('00025')
+
+    m = Mesh(p)
+    m.debug_print()
+    m.render().get_img(200).save('mesh.png')
+    return
+
     facets = reconstruct_facets(p)
     print(list(map(len, facets)))
 

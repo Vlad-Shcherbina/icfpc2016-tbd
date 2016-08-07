@@ -82,6 +82,19 @@ class Renderer:
         self.draw_commands.append(draw_command)
         return self
 
+    def draw_text(self, pt: Point, text: str, color=None):
+        if color is None:
+            color = (0, 0, 0)
+        self.update_viewport(pt)
+        def draw_command(im):
+            draw = ImageDraw.Draw(im)
+            size = draw.textsize(text)
+            x, y = self.norm(pt)
+            draw.text((x - size[0]/2, y - size[1]/2), text, fill=color)
+            return im
+        self.draw_commands.append(draw_command)
+        return self
+
     def draw_problem(self, p: ioformats.Problem):
         self.draw_unit_square()
         for poly in p.silhouette:

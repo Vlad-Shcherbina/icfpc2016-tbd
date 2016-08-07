@@ -42,6 +42,8 @@ def main():
         facets = meshes.reconstruct_facets(p)
         #print(list(map(len, facets)))
         facets = meshes.keep_real_facets(facets, p)
+
+        meshes.Mesh(p)
         #print(list(map(len, facets)))
         print('{:>6} {:6}'.format(i, len(facets)))
         #print()
