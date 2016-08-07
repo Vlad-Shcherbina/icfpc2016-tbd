@@ -92,7 +92,7 @@ def union_polygon_area(vertices):
     return abs(cg.polygon_area(vertices))
 
 def transformed_congruently(op, facet, dp):
-    edges = get_edges(op, facet)
+    edges = cg.get_edges(op, facet)
 
     for p1,p2 in edges:
         oa = of.Edge(op[p1], op[p2]).a
@@ -114,24 +114,15 @@ def do_facets_intersect(op, f1, f2):
     See: Bentley-Ottmann algorithm
     '''
 
-    for edge1 in get_edges(op, f1):
+    for edge1 in cg.get_edges(f1):
         edge1 = op[edge1[0]], op[edge1[1]]
-        for edge2 in get_edges(op, f2):
+        for edge2 in cg.get_edges(f2):
             edge2 = op[edge2[0]], op[edge2[1]]
             if cg.edge_intersection_not_at_endpoints(edge1, edge2) is not None:
                 return True
 
     return False
 
-
-def get_edges(op, facet):
-    res = []
-    
-    for v1, v2 in zip(facet, facet[1:]):
-        res.append((v1, v2))
-
-    res.append((facet[-1], facet[0]))
-    return res
 
 def main():
     parser = argparse.ArgumentParser(description='Validate solution in a file')

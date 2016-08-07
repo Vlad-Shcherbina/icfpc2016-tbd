@@ -212,6 +212,16 @@ def polygon_area(vertices: List[Point]) -> Fraction:
     return s / Fraction(2)
 
 
+def get_edges(poly):
+    res = []
+    
+    for v1, v2 in zip(poly, poly[1:]):
+        res.append((v1, v2))
+
+    res.append((poly[-1], poly[0]))
+    return res
+
+
 def is_point_on_edge(pt: Point, edge: Tuple[Point, Point]) -> bool:
     pt1, pt2 = edge
     assert pt1 != pt2
