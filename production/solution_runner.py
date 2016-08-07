@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import os, sys
+import re
 import pprint, ast
 from typing import NamedTuple, Tuple, Dict, List
 from collections import namedtuple
@@ -204,6 +205,17 @@ def runner(solver_cls, problem_id, solution_pipe):
 
 def list_problems():
     return sorted(s.stem for s in (get_root() / 'problems').glob('[0-9]' * 5 + '.txt'))
+
+
+def list_hard_problems():
+    result = []
+    with (get_root() / 'manpages_scratch' / 'all_problems.txt').open() as fin:
+        for line in fin:
+            m = re.match(r'\s+(\d+)\s+\d+\s+\d+\s+\d+', line)
+            if m is not None:
+                #print(m.group(1))
+                result.append('{:05}'.format(int(m.group(1))))
+    return result
 
 
 def main():
