@@ -45,7 +45,6 @@ def fold_to_convex_hull(polys, hull_edges, folded_polys=1):
     i = 0
     l = len(hull_edges)
     for e in hull_edges:
-        polys = of.fold(polys, e, cg.Point(cg.Fraction(1,2), cg.Fraction(1,2)))
         next_e = hull_edges[i+1 if i < (l-1) else 0]
         ref_p = next_e.p1
         print(str(folded_polys) + '-' + str(i+1))
@@ -58,8 +57,6 @@ def fold_to_convex_hull(polys, hull_edges, folded_polys=1):
         visualise(trpts, str(folded_polys) + '-' + str(i+1) + 'partial')
         i += 1
 
-    for e in hull_edges:
-        polys = of.fold(polys, e, cg.Point(cg.Fraction(1,2), cg.Fraction(1,2)))
     if len(polys) > folded_polys:
         return fold_to_convex_hull(polys, hull_edges, len(polys))
     else:
