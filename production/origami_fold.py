@@ -222,7 +222,7 @@ def point_to_str(p):
     return ','.join([str(x) for x in p])
 
 import sys, collections
-def write_fold(polys, f=sys.stdout):
+def write_fold(polys, f=sys.stdout, offset=None):
     polys = sorted(polys, key=lambda x:-x.t_number)  # highest transformation number goes first
     
     d = collections.OrderedDict()  # point -> polygon
@@ -249,7 +249,10 @@ def write_fold(polys, f=sys.stdout):
         f.write('%d ' % len(ppi))
         f.write(' '.join(map(str, ppi)))
         f.write('\n')
-                    
+    
+    if offset:  # add offset to transformed points if necessary
+        points_dst = [p + offset for p in points_dst]
+        
     for p in points_dst:                # destination point coords
         f.write(point_to_str(p)); f.write('\n')
     return ioformats.Solution(orig_points=points_src, facets=pp, dst_points=points_dst)
