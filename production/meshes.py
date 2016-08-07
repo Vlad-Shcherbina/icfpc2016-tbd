@@ -217,6 +217,29 @@ class Mesh:
         return [bone[1] - bone[0] for bone in self.bones_by_node[node]]
 
 
+    def precompute_span_templates(self):
+        self.corners = set()
+        self.transitions = {1: {}, 2: {}}
+
+        for node in self.nodes:
+            star = self.get_node_star(node)
+            for angle in 1, 2:
+                for st in generate_span_templates(star, 1):
+                    if angle == 1:
+                        self.corners.add(node)
+                    assert st[0][0] == 1
+                    end1 = st[0][1]
+                    if st[-1][0] == 1:
+                        end2 = (st[-1][1] + 1) % len(star)
+                    else:
+                        end2 = st[-1][1]
+
+                    for e1, e2 in (end1, end2), (end2, end1):
+                        bone1 = self.bones_by_node[node][e1][::-1]
+                        bone2 = self.bones_by_node[node][e2]
+                        self.transitions[angle].setdefault(bone1, set()).add(bone2)
+
+
 def match_angle(start, finish, angle):
     if angle == 1:
         return start.dot(finish) == 0 and start.cross(finish) > 0
@@ -368,21 +391,26 @@ def intermediate_points(angle1, angle2):
 
 
 def main():  # pragma: no cover
-    p = ioformats.load_problem('00017')
+    p = ioformats.load_problem('00012')
 
     m = Mesh(p)
     m.debug_print()
     m.render().get_img(200).save('mesh.png')
 
+    m.precompute_span_templates()
+    print('corners', m.corners)
+    pprint.pprint(m.transitions)
+
+    return
     for node in m.nodes:
         print()
         print('node', node, m.describe_node(node))
         star = m.get_node_star(node)
         print('star', star)
 
-        for angle in 1, 2, 4:
-            for span in generate_span_templates(star, angle):
-                print(' ', angle, m.describe_span_template(node, span))
+        #for angle in 1, 2, 4:
+        #    for span in generate_span_templates(star, angle):
+        #        print(' ', angle, m.describe_span_template(node, span))
 
 
     return
