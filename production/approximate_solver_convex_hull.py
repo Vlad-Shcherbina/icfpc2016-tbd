@@ -5,6 +5,7 @@ from production.convex_hull import fold_to_convex_hull, convex_hull, visualise
 from production import api_wrapper as aw
 
 from evaluator import evaluator_main as ev
+from production.dedup import find_original_solution
 
 import argparse
 
@@ -39,35 +40,35 @@ def compute_approximate_solution(i):
     #trpts.append(pts)
     #visualise(trpts)
 
-    with open('solutions/%s-ch.txt' % i, 'w') as f:
+    with open('/dev/null', 'w') as f:
         sol = of.write_fold(polys, f, offset)
-        sol = ioformats.solution_to_str(sol)
+        sols = ioformats.solution_to_str(sol)
 
-    if ioformats.solution_size(sol) < 5000:
-        if True:
+    if ioformats.solution_size(sols) < 5000:
 
-            problem_id = int(i)
-            try:
-                r = aw.submit_solution(problem_id, sol)
-                print(r.text)
-            except:
-                pass
+        problem_id = int(i)
+        try:
+            r = aw.submit_solution(problem_id, sol)
+            print(r.text)
+        except Exception as e:
+            print(e)
 
 
-            sleep(1)
+        sleep(1)
         
 
 if __name__ == '__main__':
     # 4461
     # problems = [989, 1456, 2606, 3560, 3852, 3854, 3929, 4008, 4010, 4229, 4236, 4239, 4861, 5195, 5199, 5293, 5311, 5724, 5726, 5907, 5933, 5949]
     #problems = [5195, 5199, 5293, 5311, 5724, 5726, 5907, 5949]
-    problems = range(3500, 6258)
+    problems = range(1, 3500)
 
     #parser = argparse.ArgumentParser(description='Compute approximate solution')
     #parser.add_argument(dest='prob_id')
     #args = parser.parse_args()
     #compute_approximate_solution(args.prob_id)
     for p in problems:
-        prob = '{0:05d}'.format(p)
-        compute_approximate_solution(prob)
+        if find_original_solution(p) is None:
+            prob = '{0:05d}'.format(p)
+            compute_approximate_solution(prob)
 
