@@ -1,3 +1,4 @@
+import json
 from pprint import pprint
 
 d = {}
@@ -11,4 +12,4 @@ with open('_problem_hashes') as f:
         else:
             d[xs[0]].append(i)
 
-pprint(d)
+print(json.dumps(d))
