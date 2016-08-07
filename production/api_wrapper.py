@@ -127,6 +127,9 @@ def submit_solution(problem_id, solution_spec, file=False):
     elif r.status_code == 429:
         sleep(1)
         return submit_solution(problem_id, solution_spec)
+    elif r.status_code == 402:
+        sleep(10)
+        return submit_solution(problem_id, solution_spec)
     elif r.status_code == 400:
         raise ServerRejectedError(r.json()['error']) 
     else:

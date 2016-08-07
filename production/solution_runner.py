@@ -40,14 +40,16 @@ def print_err(*args, **kwargs):
 
 class SolutionDb(dict):
     def __init__(self):
-        self.directory = get_root() / 'solutions'
+        self.db_file = get_root() / 'solutions' / 'solution_db.txt' 
         self.load()
         self.update_from_directory()
 
 
     def load(self):
         self.clear()
-        with (self.directory / 'solution_db.txt').open('r') as f:
+        if not self.db_file.exists(): return
+        
+        with self.db_file.open('r') as f:
             for line in f:
                 if not line.strip(): continue
                 s = ProblemStatus(*ast.literal_eval(line))
@@ -56,7 +58,7 @@ class SolutionDb(dict):
                 self[s.id] = s
 
     def update_from_directory(self):
-        solutions = (get_root() / 'solutions').glob('solved_*.txt')
+        solutions = self.db_file.parent.glob('solved_*.txt')
         for f in solutions:
             sid = f.stem[len('solved_'):]
             if sid in self: continue 
