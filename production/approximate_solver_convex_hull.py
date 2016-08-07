@@ -7,6 +7,8 @@ from production import api_wrapper as aw
 from evaluator import evaluator_main as ev
 from production.dedup import find_original_solution
 
+import production.unsolved_solutions_solved_by_complexity as uns
+
 import argparse
 
 from time import sleep
@@ -48,7 +50,7 @@ def compute_approximate_solution(i):
 
         problem_id = int(i)
         try:
-            r = aw.submit_solution(problem_id, sol)
+            r = aw.submit_solution(problem_id, sols)
             print(r.text)
         except Exception as e:
             print(e)
@@ -61,14 +63,14 @@ if __name__ == '__main__':
     # 4461
     # problems = [989, 1456, 2606, 3560, 3852, 3854, 3929, 4008, 4010, 4229, 4236, 4239, 4861, 5195, 5199, 5293, 5311, 5724, 5726, 5907, 5933, 5949]
     #problems = [5195, 5199, 5293, 5311, 5724, 5726, 5907, 5949]
-    problems = range(1, 3500)
+    problems = uns.x()[-900:]
+
 
     #parser = argparse.ArgumentParser(description='Compute approximate solution')
     #parser.add_argument(dest='prob_id')
     #args = parser.parse_args()
     #compute_approximate_solution(args.prob_id)
     for p in problems:
-        if find_original_solution(p) is None:
-            prob = '{0:05d}'.format(p)
-            compute_approximate_solution(prob)
+        prob = '{0:05d}'.format(p)
+        compute_approximate_solution(prob)
 
