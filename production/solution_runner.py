@@ -85,7 +85,7 @@ class SolutionDb(dict):
             assert (self.db_file.parent / status.file).exists() 
         
 
-    def update(self, sid, status, solver, data, note=''):
+    def update(self, sid, status, solver, data=None, note=''):
         if status in (STATUS_SOLVED, STATUS_REJECTED):
             assert data is not None
 
@@ -101,6 +101,14 @@ class SolutionDb(dict):
         self[sid] = ProblemStatus(sid, status, solver, filename, note)
         self.write()  
                  
+
+def runner(solver_cls, problem_id, solution_pipe):
+    try:
+        problem = ioformats.load_problem(problem_id)
+        solv = solver_cls(problem, problem_id, solution_pipe)
+        solv.run()
+    except Exception:
+        solution_pipe.send((0, traceback.format_exc()))
 
 
 def run_solver(solver_cls, problem):
@@ -149,8 +157,10 @@ def process_solved(solution_db, problem, solver_name, status, result):
             print(exc)
             status = STATUS_REJECTED
             result = str(exc) + '\n========= Submission =========\n' + result
-        
-    if status in (STATUS_CRASHED, STATUS_SOLVED, STATUS_REJECTED):
+    
+    if status == STATUS_CRASHED:
+        solution_db.update(problem, status, solver_name)
+    elif status in (STATUS_CRASHED, STATUS_SOLVED, STATUS_REJECTED):
         solution_db.update(problem, status, solver_name, result)
     elif status == STATUS_TIMEOUT:
         # store timeout in note
@@ -214,16 +224,6 @@ def solve_problems(solution_db, solver_cls, problems, max_processes=1):
             break
 
 
-def runner(solver_cls, problem_id, solution_pipe):
-    try:
-        problem = ioformats.load_problem(problem_id)
-        solv = solver_cls(problem, problem_id, solution_pipe)
-        solv.run()
-    except Exception as e:
-        Path('zzz.txt').write_text(traceback.format_exc(e))
-        solution_pipe.send((0, traceback.format_exc(e)))
-
-
 def list_problems():
     return sorted(s.stem for s in (get_root() / 'problems').glob('[0-9]' * 5 + '.txt'))
 
@@ -248,16 +248,21 @@ class DummySolver():
     def __init__(self, problem, problem_id, solution_pipe):
         pass
     def run(self):
-        pass
+        raise Exception('no duplicate found, _obviously_')
+
+
+def find_duplicates_acceptably_inefficiently():
+    problems = list_problems()
+    solve_problems(SolutionDb(), DummySolver, problems, 32)
 
 
 def main():
+    find_duplicates_acceptably_inefficiently()
+    sys.exit()
+    
     from production.solver import Solver
-#     problems = list_problems()[:50]
-#     solve_problems(SolutionDb(), DummySolver, problems, 8)
-
-    problems = list_problems()[:50]
-    solve_problems(SolutionDb(), DummySolver, problems, 8)
+    problems = list_problems()
+    solve_problems(SolutionDb(), Solver, problems, 8)
 
 if __name__ == '__main__':
     main()
