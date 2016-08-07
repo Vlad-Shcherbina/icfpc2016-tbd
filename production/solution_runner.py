@@ -5,15 +5,17 @@ import re
 import pprint, ast
 from typing import NamedTuple, Tuple, Dict, List
 from collections import namedtuple
-import threading, queue
+import threading, queue, traceback
 from multiprocessing import Process, Pipe
 from threading import Thread
 from io import StringIO
+from pathlib import Path
 
 from production import cg
 from production.cg import Point
 from production import ioformats, meshes, render, api_wrapper
-from production.ioformats import get_root
+from production.ioformats import get_root, get_problem_file
+from production import dedup
 
 THREADS = 6
 TIMEOUT = 15
@@ -74,7 +76,9 @@ class SolutionDb(dict):
                 f.write(', '.join(repr(it) for it in p))
                 f.write('\n')
 
-
+    def get_solution_file(self, sid):
+        return self.db_file.parent / 'solved_{}.txt'.format(sid)
+        
     def validate(self, status):
         assert status.status in legit_statuses
         if status.status in (STATUS_SOLVED, STATUS_REJECTED):
@@ -114,9 +118,9 @@ def run_solver(solver_cls, problem):
             child_conn.close()
             try:
                 result = parent_conn.recv()
-                if isinstance(result, Exception):
-                    return STATUS_CRASHED, result 
-                return STATUS_SOLVED, result 
+                if isinstance(result, tuple):
+                    return STATUS_CRASHED, result[1] 
+                return STATUS_SOLVED, result
             except EOFError:
                 return STATUS_CRASHED, 'no backtrace available'
     finally:
@@ -167,6 +171,22 @@ def solve_problems(solution_db, solver_cls, problems, max_processes=1):
     for p in problems:
         if p in solution_db: continue
         
+        # check against actual file just in case solution_db is out of date
+        if solution_db.get_solution_file(p).exists():
+            sys.exit()
+            print_err('solution_db out of date?')
+            solution_db.update_from_directory()
+            continue
+            
+        for original_id in dedup.get_collisions(p):
+            original = solution_db.get(original_id)
+            if original is not None:
+                if original.status == STATUS_SOLVED:
+                    process_solved(solution_db, p, 'Dedup', original.status, solution_db.get_solution_file(original.id).read_text())
+                else:
+                    solution_db.update(p, original.status, 'Dedup', original.file, original.note)
+                continue
+        
         print_err('Runner: enqueue', p)
         input_q.put(p)
 
@@ -180,18 +200,18 @@ def solve_problems(solution_db, solver_cls, problems, max_processes=1):
     
     # tell threads to terminate
     print_err('Runner: terminating threads')
-    for _ in len(threads):
+    for _ in range(len(threads)):
         input_q.put(None)
     for t in threads:
         t.join()
 
     while True:
         try:
-            p, status, result = output_q.get_nowait()
+            p, (status, result) = output_q.get_nowait()
+            print_err('Runner: dequeued', p, status)
+            process_solved(solution_db, p, solver_name, status, result)
         except queue.Empty:
             break
-        print_err('Runner: dequeued', p, status)
-        process_solved(p, solver_name, status, result)
 
 
 def runner(solver_cls, problem_id, solution_pipe):
@@ -200,7 +220,8 @@ def runner(solver_cls, problem_id, solution_pipe):
         solv = solver_cls(problem, problem_id, solution_pipe)
         solv.run()
     except Exception as e:
-        solution_pipe.write(e)
+        Path('zzz.txt').write_text(traceback.format_exc(e))
+        solution_pipe.send((0, traceback.format_exc(e)))
 
 
 def list_problems():
@@ -221,11 +242,20 @@ def list_hard_problems():
     return result
 
 
+class DummySolver():
+    def __init__(self, problem, problem_id, solution_pipe):
+        pass
+    def run(self):
+        pass
+
+
 def main():
     from production.solver import Solver
-    problems = list_problems()
-    solve_problems(SolutionDb(), Solver, problems, 8)
+#     problems = list_problems()[:50]
+#     solve_problems(SolutionDb(), DummySolver, problems, 8)
 
+    problems = list_problems()[:50]
+    solve_problems(SolutionDb(), DummySolver, problems, 8)
 
 if __name__ == '__main__':
     main()

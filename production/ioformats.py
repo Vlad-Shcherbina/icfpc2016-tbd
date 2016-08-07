@@ -66,8 +66,12 @@ def get_root() -> Path:
     return Path(__file__).resolve().parent / '..'
 
 
+def get_problem_file(name: str) -> Path:
+    return get_root() / 'problems' / '{}.txt'.format(name)
+
+
 def load_problem(name: str) -> Problem:
-    with (get_root() / 'problems' / '{}.txt'.format(name)).open('r') as f:
+    with get_problem_file(name).open('r') as f:
         data = f.read()
         return parse_problem(data)
 
