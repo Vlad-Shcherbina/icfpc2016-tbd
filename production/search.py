@@ -1,5 +1,6 @@
 import pprint
 import math
+import time
 
 from production import ioformats
 from production.meshes import Mesh, TooHardError
@@ -13,11 +14,16 @@ def edge_length(edge):
 def find_all_borders(mesh):
     starts = {v for vs in mesh.transitions[1].values() for v in vs}
 
+    finish_time = time.time() + 15
+
     borders = []
     for start in starts:
         path = [start]
 
         def rec(length):
+            if time.time() > finish_time:
+                raise TooHardError('border timeout')
+
             if length > 1 + 1e-6:
                 return
             if math.isclose(length, 1) and mesh.transitions[1].get(path[-1]):
