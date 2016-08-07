@@ -13,10 +13,18 @@ def req(x):
 	return requests.get(x, headers = headers())
 
 def getSnaps():
-	return req('http://2016sv.icfpcontest.org/api/snapshot/list')
+    r = req('http://2016sv.icfpcontest.org/api/snapshot/list')
+    if r.status_code != 200: # uporno dolbimsja
+        sleep(1)
+        return getSnaps()
+    return r
 
 def getBlob(x):
-	return req('http://2016sv.icfpcontest.org/api/blob/' + x)
+    r = req('http://2016sv.icfpcontest.org/api/blob/' + x)
+    if r.status_code != 200: # uporno dolbimsja
+        sleep(1)
+        return getBlob(x)
+    return r
 
 def loadJson(x):
     with open(x) as f:

@@ -13,7 +13,11 @@ def req(x):
     return requests.get(x, headers = headers())
 
 def getSnaps():
-    return req('http://2016sv.icfpcontest.org/api/snapshot/list')
+    r = req('http://2016sv.icfpcontest.org/api/snapshot/list')
+    if r.status_code != 200: # uporno dolbimsja
+        sleep(1)
+        return getSnaps()
+    return r
 
 def getBlob(x):
     r = req('http://2016sv.icfpcontest.org/api/blob/' + x)
