@@ -1,9 +1,10 @@
 from production import cg, ioformats
 from production import origami_fold as of
+from production.convex_hull import fold_to_convex_hull, convex_hull, visualise
 
 from production import api_wrapper as aw
 
-from production.convex_hull import fold_to_convex_hull, convex_hull, visualise
+from evaluator import evaluator_main as ev
 
 import argparse
 
@@ -13,12 +14,12 @@ def compute_approximate_solution(i):
     print(i)
 
     try:
-        prob = ioformats.load_problem(i)
+        prob_orig = ioformats.load_problem(i)
     except:
         return
-    p1 = prob.silhouette[0][0]
+    p1 = prob_orig.silhouette[0][0]
 
-    prob = ioformats.center_problem(prob)
+    prob = ioformats.center_problem(prob_orig)
     p2 = prob.silhouette[0][0]
 
     offset = p1 - p2
@@ -43,22 +44,24 @@ def compute_approximate_solution(i):
         sol = ioformats.solution_to_str(sol)
 
     if ioformats.solution_size(sol) < 5000:
-        problem_id = int(i)
-        try:
-            r = aw.submit_solution(problem_id, sol)
-            print(r.text)
-        except:
-            pass
+        if ev.evaluate_strings(prob_orig, sol, i) == 1.0:
+
+            problem_id = int(i)
+            try:
+                r = aw.submit_solution(problem_id, sol)
+                print(r.text)
+            except:
+                pass
 
 
-        sleep(1)
+            sleep(1)
         
 
 if __name__ == '__main__':
     # 4461
     # problems = [989, 1456, 2606, 3560, 3852, 3854, 3929, 4008, 4010, 4229, 4236, 4239, 4861, 5195, 5199, 5293, 5311, 5724, 5726, 5907, 5933, 5949]
     #problems = [5195, 5199, 5293, 5311, 5724, 5726, 5907, 5949]
-    problems = range(4400, 6244)
+    problems = range(1, 3500)
 
     #parser = argparse.ArgumentParser(description='Compute approximate solution')
     #parser.add_argument(dest='prob_id')

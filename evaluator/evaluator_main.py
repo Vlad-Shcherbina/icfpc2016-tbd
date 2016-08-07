@@ -62,7 +62,9 @@ def evaluate(prob, sol):
         aas.Matcher.Or([prob_matcher, sol_matcher]),
     ])
     values = appr.approximate()
+
     print(values[0] / values[1])
+    return (values[0] / values[1])
 
 
 def append_poly_with_inclusion(polys, new_poly):
