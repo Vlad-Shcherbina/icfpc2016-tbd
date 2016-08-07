@@ -180,13 +180,17 @@ class Mesh:
         return tuple(self.left_fragment_by_bone[bone]
                      for bone in self.bones_by_node[node])
 
+    def get_forbidden_idx(self, node):
+        return {i for i, bone in enumerate(self.bones_by_node[node])
+                if self.left_fragment_by_bone[bone].endswith('_virt')}
+
     def describe_span_template(self, node, span):
         result = []
         for dir, f in span:
-            result.append((
-                {1: 'forward', -1: 'back'}[dir],
+            result.append(
+                {1: 'forward ', -1: 'back '}[dir] + 
                 self.left_fragment_by_bone[self.bones_by_node[node][f]]
-            ))
+            )
         return result
 
     def debug_print(self):
@@ -251,34 +255,51 @@ def match_angle(start, finish, angle):
         assert False, angle
 
 
-def approx_angle(float_angles, start_loc, flip_locs, target_loc):
-    s = 0
+
+def enumerate_idx(*, angle, star_size, start_loc, flip_locs, target_loc):
+#def approx_angle(angle, float_angles, start_loc, flip_locs, target_loc):
+    result = []
     idx = start_loc
     dir = 1
     for flip_loc in flip_locs:
         while True:
             if dir > 0:
-                s += float_angles[idx]
+                result.append(idx)
             idx += dir
-            idx %= len(float_angles)
+            idx %= star_size
             if dir < 0:
-                s += float_angles[idx]
+                result.append(idx)
 
             if idx == flip_loc:
                 break
         dir = -dir
 
-    while idx != target_loc:
+    while idx != target_loc or (angle == 4 and not flip_locs):
         if dir > 0:
-            s += float_angles[idx]
+            result.append(idx)
         idx += dir
-        idx %= len(float_angles)
+        idx %= star_size
         if dir < 0:
-            s += float_angles[idx]
-    return s
+            result.append(idx)
+
+        if idx == target_loc:
+            break
+
+    return result
 
 
-def generate_span_templates(star, angle):
+def approx_angleasdf(angle, float_angles, start_loc, flip_locs, target_loc):
+    return sum(
+        float_angles[idx]
+        for idx in enumerate_idx(
+                angle=angle,
+                star_size=len(float_angles),
+                start_loc=start_loc,
+                flip_locs=flip_locs,
+                target_loc=target_loc))
+
+
+def generate_span_templates_internal(star, angle, forbidden_idx):
     #if angle >= 1: print('star size', len(star))
 
     assert len(star) >= 2
@@ -301,11 +322,23 @@ def generate_span_templates(star, angle):
                 for target_loc in range(len(star)):
                     cnt += 1
                     #if cnt % 1000 == 0: print('cnt', cnt)
-                    if cnt > 1000000:
+                    if cnt > 200000:
                         return
 
-                    s = approx_angle(float_angles, start_loc, flip_locs, target_loc)
-                    if not math.isclose(s, math.pi / 2 * angle, abs_tol=1e-6):
+                    idxes = enumerate_idx(
+                        angle=angle,
+                        star_size=len(float_angles),
+                        start_loc=start_loc,
+                        flip_locs=flip_locs,
+                        target_loc=target_loc)
+
+                    if any(idx in forbidden_idx for idx in idxes):
+                        continue
+
+                    #s = approx_angle(
+                    #    angle, float_angles, start_loc, flip_locs, target_loc)
+                    approx_angle = sum(float_angles[idx] for idx in idxes)
+                    if not math.isclose(approx_angle, math.pi / 2 * angle, abs_tol=1e-6):
                         continue
 
                     span = []
@@ -343,7 +376,7 @@ def generate_span_templates(star, angle):
                         continue
 
                     #print('*')
-                    while idx != target_loc:
+                    while idx != target_loc or (angle == 4 and not flip_locs):
                         if dir > 0:
                             span.append((dir, idx))
                         idx += dir
@@ -354,8 +387,11 @@ def generate_span_templates(star, angle):
                         trajectory.extend(
                             intermediate_points(trajectory[-1], ss[idx]))
                         trajectory.append(ss[idx])
-                        #print(trajectory)
 
+                        if idx == target_loc:
+                            break
+
+                    assert idxes == [s for _, s in span]
                     if match_angle(start, ss[target_loc], angle):
                         trajectory.extend(
                             intermediate_points(trajectory[-1], trajectory[0]))
@@ -378,8 +414,7 @@ def generate_span_templates(star, angle):
                         if angle == 4 and max(span) != span[0]:
                             continue
 
-                        s = approx_angle(float_angles, start_loc, flip_locs, target_loc)
-                        assert math.isclose(s, math.pi / 2 * angle)
+                        assert math.isclose(approx_angle, math.pi / 2 * angle)
                         yield span
 
 
@@ -398,6 +433,18 @@ def intermediate_points(angle1, angle2):
     return []
 
 
+def generate_span_templates(star, angle, forbidden_idx):
+    spans = set()
+    for span in generate_span_templates_internal(star, angle, forbidden_idx):
+        rspan = [(-d, f) for d, f in reversed(span)]
+        spans.add(tuple(span))
+        spans.add(tuple(rspan))
+
+    # TODO: deduplicate cyclyc stuff
+
+    return sorted(spans)
+
+
 def main():  # pragma: no cover
     p = ioformats.load_problem('00012')
 
@@ -405,20 +452,20 @@ def main():  # pragma: no cover
     m.debug_print()
     m.render().get_img(200).save('mesh.png')
 
-    m.precompute_span_templates()
-    print('corners', m.corners)
-    pprint.pprint(m.transitions)
+    #m.precompute_span_templates()
+    #print('corners', m.corners)
+    #pprint.pprint(m.transitions)
+    #return
 
-    return
     for node in m.nodes:
         print()
         print('node', node, m.describe_node(node))
         star = m.get_node_star(node)
         print('star', star)
 
-        #for angle in 1, 2, 4:
-        #    for span in generate_span_templates(star, angle):
-        #        print(' ', angle, m.describe_span_template(node, span))
+        for angle in 1, 2, 4:
+            for span in generate_span_templates(star, angle, m.get_forbidden_idx(node)):
+                print(' ', angle, m.describe_span_template(node, span))
 
 
     return
