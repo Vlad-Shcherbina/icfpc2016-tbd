@@ -156,7 +156,7 @@ def main():
     # test problem lookup
 
     # test solution submission
-    submit_solution(1, 'solutions/001.txt', True)
+    submit_solution(1, 'solutions/solved_00001.txt', True)
 
 if __name__ == "__main__":
     main()
