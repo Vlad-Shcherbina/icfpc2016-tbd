@@ -63,7 +63,7 @@ if __name__ == '__main__':
     # 4461
     # problems = [989, 1456, 2606, 3560, 3852, 3854, 3929, 4008, 4010, 4229, 4236, 4239, 4861, 5195, 5199, 5293, 5311, 5724, 5726, 5907, 5933, 5949]
     #problems = [5195, 5199, 5293, 5311, 5724, 5726, 5907, 5949]
-    problems = uns.x()[-900:]
+    problems = uns.x()[49:-900:2]
 
 
     #parser = argparse.ArgumentParser(description='Compute approximate solution')
