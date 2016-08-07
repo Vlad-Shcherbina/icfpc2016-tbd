@@ -2,6 +2,7 @@ import requests
 import json
 from pprint import pprint
 from time import sleep, time
+from production.dedup import find_original_solution
 
 def ak():
 	return '118-b9f09e59e76bd290bfec1b0513304002'
@@ -68,4 +69,4 @@ for problem in d['problems']:
                    'hours_ago': (time() - problem['publish_time']) / 3600})
 
 scrunch = sorted(crunch, key=lambda x: x['ones'][0])
-pprint(list(map(lambda x: x['id'], scrunch)))
+pprint(list(filter(lambda y: (find_original_solution(y) is None), map(lambda x: x['id'], scrunch))))
