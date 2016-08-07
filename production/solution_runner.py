@@ -15,7 +15,7 @@ from production import cg
 from production.cg import Point
 from production import ioformats, meshes, render, api_wrapper
 from production.ioformats import get_root, get_problem_file
-from production.dedup import get_thingies
+from production import dedup
 
 THREADS = 6
 TIMEOUT = 15
@@ -242,7 +242,7 @@ def list_hard_problems():
     return result
 
 def list_very_dups():
-    return list(map(lambda x: int(x[0]), get_thingies()))
+    return list(map(lambda x: int(x[0]), dedup.get_thingies()))
 
 class DummySolver():
     def __init__(self, problem, problem_id, solution_pipe):
