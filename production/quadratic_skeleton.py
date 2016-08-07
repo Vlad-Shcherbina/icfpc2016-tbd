@@ -39,7 +39,8 @@ def fold_at_3_4(polys, eps=Fraction(-1, 2)):
 def fold_at_45_2(polys):
     # eps = Fraction(1, 50) # 1st submission
     # eps = Fraction(1, 5) # TWEEK HERE
-    eps = Fraction(1, 7) # TWEEK HERE
+    # eps = Fraction(97, 800) # just touch
+    eps = Fraction(96, 800) # TWEEK HERE
     return fold(polys, Edge(Point(Fraction(1), Fraction(1, 2) + eps),
                             Point(Fraction(3, 2), Fraction(0) + eps)))
 
