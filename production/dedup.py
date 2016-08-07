@@ -39,6 +39,13 @@ def get_collisions(problem_id):
         return map_hash_to_ids[hash]
     return []
 
+def get_thingies():
+    load_mapping()
+    tosort = []
+    for k, v in map_hash_to_ids.items():
+        tosort.append( (v[0], len(v) ))
+    return sorted(tosort, key=lambda x: x[1])
+
 def find_original_solution(problem_id):
     for candidate in get_collisions(problem_id):
         if os.path.exists(five_digits_to_solution_file(candidate)):
