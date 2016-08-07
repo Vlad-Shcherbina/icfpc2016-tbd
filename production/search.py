@@ -86,6 +86,11 @@ def find_perimeters(mesh, borders):
                     yield (b1, b2, b3, b4)
 
 
+def all_substrings(xs):
+    for i in range(len(xs)):
+        for j in range(i + 1, len(xs) + 1):
+            yield xs[i:j]
+
 
 class Solver:
     def __init__(self, mesh, perimeter):
@@ -98,16 +103,56 @@ class Solver:
                 for i in range(len(q)):
                     q = q[1:] + q[:1]
                     a = mesh.describe_span_template(node, q)
-                    for j in range(len(a)):
-                        for k in range(j + 1, len(a) + 1):
-                            self.allowed_by_node[node].add(tuple(a[j:k]))
+                    # TODO
+                    #for j in range(len(a)):
+                    #    for k in range(j + 1, len(a) + 1):
+                    #        self.allowed_by_node[node].add(tuple(a[j:k]))
                     a = ['cycle'] + a + ['cycle']
                     self.allowed_by_node[node].add(tuple(a))
 
-        pprint.pprint(self.allowed_by_node)
 
-        #for border in perimeter:
-        #    for i in range(len
+        def flip(a):
+            return  [
+                x.replace('forward', 'tmp')
+                 .replace('back', 'forward')
+                 .replace('tmp', 'back')
+                for x in a[::-1]]
+
+        for border_no, border in enumerate(perimeter):
+            for i in range(len(border) - 1):
+                node = border[i][1]
+                for st in mesh.span_templates[node, 2]:
+                    bone1, bone2 = mesh.span_end_bones(node, st)
+                    if bone1[::-1] != border[i] or bone2 != border[i + 1]:
+                        # print('uff')
+                        continue
+
+                    a = (['border_{}_{}'.format(border_no, i)] +
+                         mesh.describe_span_template(node, st) +
+                         ['border_{}_{}'.format(border_no, i + 1)])
+
+                    for a in (a, flip(a)):
+                        self.allowed_by_node[node].add(tuple(a))
+
+        for border_no in range(4):
+            node = perimeter[border_no][0][0]
+            print(node)
+
+            for st in mesh.span_templates[node, 1]:
+                bone1, bone2 = mesh.span_end_bones(node, st)
+                if (bone1[::-1] != perimeter[(border_no - 1) % 4][-1] or
+                    bone2 != perimeter[border_no][0]):
+                    # print('uff')
+                    continue
+
+                a = (['border_{}_{}'.format((border_no - 1) % 4, len(perimeter[(border_no - 1) % 4]) - 1)] +
+                     mesh.describe_span_template(node, st) +
+                     ['border_{}_{}'.format(border_no, 0)])
+
+                for a in (a, flip(a)):
+                    self.allowed_by_node[node].add(tuple(a))
+
+        pprint.pprint(self.allowed_by_node)
         #for node in mesh.node
 
 

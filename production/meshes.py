@@ -224,6 +224,17 @@ class Mesh:
     def get_node_star(self, node):
         return [bone[1] - bone[0] for bone in self.bones_by_node[node]]
 
+    def span_end_bones(self, node, st):
+        n = len(self.bones_by_node[node])
+        if st[0][0] == 1:
+            end1 = st[0][1]
+        else:
+            end1 = (st[0][1] + 1) % n
+        if st[-1][0] == 1:
+            end2 = (st[-1][1] + 1) % n
+        else:
+            end2 = st[-1][1]
+        return self.bones_by_node[node][end1], self.bones_by_node[node][end2]
 
     def precompute_span_templates(self):
         self.corners = set()
