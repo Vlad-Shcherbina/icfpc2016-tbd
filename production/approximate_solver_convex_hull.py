@@ -65,5 +65,5 @@ if __name__ == '__main__':
     #args = parser.parse_args()
     #compute_approximate_solution(args.prob_id)
     for p in problems:
-      prob = '{0:05d}'.format(p)
-      compute_approximate_solution(prob)
+        prob = '{0:05d}'.format(p)
+        compute_approximate_solution(prob)
