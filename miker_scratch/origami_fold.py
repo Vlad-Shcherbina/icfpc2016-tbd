@@ -270,6 +270,8 @@ def make_points(pnts):
 def make_poly(pnts):
     return Polygon(list(map(lambda t:Edge(*t), zip(pnts, pnts[1:] + [pnts[0]]))))
 
+def print_poly(poly):
+	print('SRC: {} TRANS: {}'.format(repr(list(polygon_points(poly))), repr(polygon.trans_points)))
     
 pnts = make_points([
     (0, 0),

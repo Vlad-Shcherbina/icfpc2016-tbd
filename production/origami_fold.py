@@ -125,14 +125,16 @@ class Polygon(Polygon):
     
         # find intersections with edges
         ps = []
+        pss = set()
         for e in self.edges:
             p = e.intersects_with_line(e_dis)
             if p is None:  # coincidence with the edge
-                return False
-            if p:
+                return None
+            if p and p not in pss:
+                pss.add(p)
                 ps.append((p, e))
                 
-        if len(ps) < 2: 
+        if len(ps) < 2:
             return False
             
         p1, e1 = ps[0]
