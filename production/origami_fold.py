@@ -192,6 +192,7 @@ def fold(polys, e_dis, ref_p=None):
     this_transform = cg.AffineTransform.mirror(*e_dis)
     
     ret_polys = []
+
     for poly in polys:
         ret = poly.dissect(e_dis)
         if not ret:

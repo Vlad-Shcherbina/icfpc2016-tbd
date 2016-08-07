@@ -57,7 +57,7 @@ def get_snapshot(lhash):
 solution_spec_file should be a valid path to a solution file
 '''
 # solution_spec_file :: str
-# publish_time :: int
+# publish_time :: utctime
 def submit_problem(publish_time, solution_spec_file):
     s = {'solution_spec' : open(solution_spec_file, 'r').read()}
     t = {'publish_time' : publish_time}
@@ -80,7 +80,7 @@ def submit_problem(publish_time, solution_spec_file):
         raise Exception("Couldn't submit the problem")
         
 
-# problem_id :: utctime
+# problem_id :: int
 # solution_spec :: str
 def submit_solution(problem_id, solution_spec, file=False):
     p = {'problem_id' : problem_id}

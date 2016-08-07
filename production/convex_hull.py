@@ -2,7 +2,12 @@
 Find a convex hull for a set of points
 """
 
+from math import sqrt
+
 from production import cg, ioformats
+import production.origami_fold as of
+
+import argparse
 
 #convex_hull :: [Point] -> [Point]
 def convex_hull(points_list):
@@ -32,15 +37,19 @@ def convex_hull(points_list):
     # Throw away the last point of each half-hull as it's repeated at the beginning of the other one. 
     return lower[:-1] + upper[:-1]
 
-def visualize():
+# fold_to_convex_hull :: [polygon] -> convex hull edges -> [polygon]
+# fold_to_convex_hull :: [[Point]] -> [Edge] -> [Polygon]
+def fold_to_convex_hull(polys, hull_edges, folded_polys=1):
+    for e in hull_edges:
+        polys = of.fold(polys, e, cg.Point(cg.Fraction(1,2), cg.Fraction(1,2)))
+    if len(polys) > folded_polys:
+        return fold_to_convex_hull(polys, hull_edges, len(polys))
+    else:
+        return polys
+
+def visualise(polys, id):
     from production.render import render_polys_and_edges
-    i = '00034'
-    poly = ioformats.load_problem(i).silhouette[0]
-    hull = convex_hull(poly)
 
-    im = render_polys_and_edges([poly, hull], [], size=1000)
-    im.save('img/ch%s.png' % i)
+    im = render_polys_and_edges(polys, [], size=1000)
+    im.save('img/ch%s.png' % id)
 
-
-if __name__ == '__main__':
-    visualize()

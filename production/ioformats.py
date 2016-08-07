@@ -96,7 +96,7 @@ def solution_size(s: str) -> int:
     return sum(1 for c in s if not c.isspace())
 
 
-def parse_solution(s: str) -> Problem:
+def parse_solution(s: str) -> Solution:
     lines = iter(line for line in s.splitlines() if line.strip())
 
     num_points = int(next(lines))
@@ -125,8 +125,8 @@ def center_problem(problem: Problem) -> Problem:
             sx += p.x
             sy += p.y
             cnt += 1
-    sx = sx / cnt - 0.5
-    sy = sy / cnt - 0.5
+    sx = sx / cnt - Fraction(1,2)
+    sy = sy / cnt - Fraction(1,2)
     return Problem(
             [[Point(p.x - sx, p.y - sy) for p in f] for f in problem.silhouette],
             [(Point(p1.x - sx, p1.y - sy), Point(p2.x - sx, p2.y - sy)) for p1, p2 in problem.skeleton])
