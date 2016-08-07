@@ -225,14 +225,24 @@ class Mesh:
         self.corners = set()
         self.transitions = {1: {}, 2: {}}
 
+        self.span_templates = {}
         for node in self.nodes:
             star = self.get_node_star(node)
-            for angle in 1, 2:
-                for st in generate_span_templates(star, 1):
+            for angle in 1, 2, 4:
+                self.span_templates[node, angle] = list(
+                    generate_span_templates(star, angle, self.get_forbidden_idx(node)))
+
+                if angle == 4:
+                    continue
+
+                for st in self.span_templates[node, angle]:
                     if angle == 1:
                         self.corners.add(node)
-                    assert st[0][0] == 1
-                    end1 = st[0][1]
+
+                    if st[0][0] == 1:
+                        end1 = st[0][1]
+                    else:
+                        end1 = (st[0][1] + 1) % len(star)
                     if st[-1][0] == 1:
                         end2 = (st[-1][1] + 1) % len(star)
                     else:
@@ -255,14 +265,15 @@ def match_angle(start, finish, angle):
         assert False, angle
 
 
-
 def enumerate_idx(*, angle, star_size, start_loc, flip_locs, target_loc):
-#def approx_angle(angle, float_angles, start_loc, flip_locs, target_loc):
     result = []
     idx = start_loc
     dir = 1
-    for flip_loc in flip_locs:
+    for i, flip_loc in enumerate(flip_locs):
         while True:
+            if i == 0 and idx == flip_loc:
+                break
+
             if dir > 0:
                 result.append(idx)
             idx += dir
@@ -348,10 +359,12 @@ def generate_span_templates_internal(star, angle, forbidden_idx):
                     dir = 1
 
                     ss = list(star)
-                    for flip_loc in flip_locs:
+                    for i, flip_loc in enumerate(flip_locs):
                         #print('*')
                         while True:
-                            #span.append(
+                            if i == 0 and idx == flip_loc:
+                                break
+                            
                             if dir > 0:
                                 span.append((dir, idx))
                             idx += dir
@@ -408,7 +421,7 @@ def generate_span_templates_internal(star, angle, forbidden_idx):
                                 continue
 
                         assert span
-                        assert span[0][0] == 1
+                        #assert span[0][0] == 1
                         #print(' ', start_loc, flip_locs, target_loc, trajectory, span)
 
                         if angle == 4 and max(span) != span[0]:
@@ -434,15 +447,20 @@ def intermediate_points(angle1, angle2):
 
 
 def generate_span_templates(star, angle, forbidden_idx):
+
     spans = set()
     for span in generate_span_templates_internal(star, angle, forbidden_idx):
         rspan = [(-d, f) for d, f in reversed(span)]
         spans.add(tuple(span))
         spans.add(tuple(rspan))
 
-    # TODO: deduplicate cyclyc stuff
+    # deduplicate cyclyc stuff
+    if angle == 4:
+        def canonicalize(span):
+            return max(span[i:] + span[:i] for i in range(len(span)))
+        spans = set(map(canonicalize, spans))
 
-    return sorted(spans)
+    return sorted(spans, reverse=True)
 
 
 def main():  # pragma: no cover

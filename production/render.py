@@ -144,9 +144,10 @@ class Renderer:
         self.points_for_viewport.append(pt)
 
     def norm(self, pt: Point):
+        d = 5
         return (
-            (self.size - 1) * (pt.x - self.min_x) / (self.max_x - self.min_x),
-            self.size - 1 - (self.size - 1) * (pt.y - self.min_y) / (
+            d + (self.size - 1 - 2 * d) * (pt.x - self.min_x) / (self.max_x - self.min_x),
+            self.size - 1 - d - (self.size - 1 - 2 * d) * (pt.y - self.min_y) / (
                 self.max_y - self.min_y),
         )
 

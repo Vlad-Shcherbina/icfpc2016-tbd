@@ -47,17 +47,24 @@ def main():
         m = meshes.Mesh(p)
 
         t = time.time()
-        for node in m.nodes:
-            star = m.get_node_star(node)
-            for angle in 1, 2, 4:
-                list(meshes.generate_span_templates(star, angle))
+
+        m.precompute_span_templates()
+        qq = sum(map(len, m.span_templates.values()))
+
+        #for node in m.nodes:
+        #    star = m.get_node_star(node)
+        #    for angle in 1, 2, 4:
+        #        list(meshes.generate_span_templates(
+        #            star, angle, m.get_forbidden_idx(node)))
+
+
                 #for span in generate_span_templates(star, angle):
                 #print(' ', angle, m.describe_span_template(node, span))
         t = time.time() - t
 
 
         #print(list(map(len, facets)))
-        print('{:>6} {:6} {:10.2}'.format(i, len(facets), t))
+        print('{:>6} {:6} {:10} {:12.2}'.format(i, len(facets), qq, t))
         #print()
 
     print(cnt, 'problems total')
