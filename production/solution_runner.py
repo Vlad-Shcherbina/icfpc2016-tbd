@@ -4,6 +4,7 @@ import os, sys
 import pprint, ast
 from typing import NamedTuple, Tuple, Dict, List
 from collections import namedtuple
+import threading, queue
 from multiprocessing import Process, Pipe
 from threading import Thread
 from io import StringIO
@@ -13,7 +14,7 @@ from production.cg import Point
 from production import ioformats, meshes, render, api_wrapper
 from production.ioformats import get_root
 
-
+THREADS = 6
 TIMEOUT = 15
 
 STATUS_SOLVED = 'solved'
@@ -32,11 +33,16 @@ legit_statuses = frozenset((
 
 ProblemStatus = namedtuple('ProblemStatus', 'id status solver file note')
 
+def print_err(*args, **kwargs):
+    print(*args, file=sys.stderr)
+    sys.stderr.flush()
+    
 
 class SolutionDb(dict):
     def __init__(self):
         self.directory = get_root() / 'solutions'
         self.load()
+        self.update_from_directory()
 
 
     def load(self):
@@ -49,6 +55,15 @@ class SolutionDb(dict):
                 assert s.id not in self
                 self[s.id] = s
 
+    def update_from_directory(self):
+        solutions = (get_root() / 'solutions').glob('solved_*.txt')
+        for f in solutions:
+            sid = f.stem[len('solved_'):]
+            if sid in self: continue 
+            assert int(sid, 10)
+            s = ProblemStatus(sid, STATUS_SOLVED, 'Unknown', f.name, '')
+            self[s.id] = s
+        self.write()
 
     def write(self):
         with (self.directory / 'solution_db.txt').open('w') as f:
@@ -80,19 +95,6 @@ class SolutionDb(dict):
         self.write()  
                  
 
-solution_db = SolutionDb()
-
-def _generate_solution_db_from_legacy():
-    assert not solution_db
-    solutions = (get_root() / 'solutions').glob('solved_*.txt')
-    for f in solutions:
-        sid = f.stem[len('solved_'):]
-        assert int(sid, 10)
-        s = ProblemStatus(sid, STATUS_SOLVED, 'Solver', f.name, '')
-        solution_db[s.id] = s
-    solution_db.write()
-# _generate_solution_db_from_legacy()
-
 
 def run_solver(solver_cls, problem):
     parent_conn, child_conn = Pipe()
@@ -101,7 +103,7 @@ def run_solver(solver_cls, problem):
         p.start()
         p.join(TIMEOUT)
         if p.exitcode is None:
-            print('Terminating!!!', file=sys.stderr)
+            print_err('Timeout, terminating!!!')
             p.terminate()
             p.join()
             return STATUS_TIMEOUT, TIMEOUT
@@ -119,14 +121,23 @@ def run_solver(solver_cls, problem):
         child_conn.close()
 
 
-def solve_problem(solver_cls, problem):
-    solver_name = solver_cls.__name__
-    print('Solving {} with {}'.format(problem, solver_name))
-    status, result = run_solver(solver_cls, problem)
+def thread_worker(solver_cls, input_q, output_q):
+    while True:
+        problem = input_q.get()
+        print_err('Thread: dequed', problem)
+        if problem is None:
+            return
+        output_q.put((problem, run_solver(solver_cls, problem)))
+        print_err('Thread: enqueued', problem)
+
+
+def process_solved(solution_db, problem, solver_name, status, result):
+    if problem in solution_db: return
+    
     if status == STATUS_SOLVED:
         # try submitting
         try:
-            api_wrapper.s_submit_solution(int(problem), result)
+            print(api_wrapper.s_submit_solution(int(problem), result).json())
         except api_wrapper.ServerRejectedError as exc:
             print(exc)
             status = STATUS_REJECTED
@@ -139,7 +150,45 @@ def solve_problem(solver_cls, problem):
         solution_db.update(problem, status, solver_name, None, result)
     else:
         assert False, 'Unknown status {!r} {!r}'.format(status, result)
-    return status
+
+
+def solve_problems(solution_db, solver_cls, problems, max_processes=1):
+    solver_name = solver_cls.__name__
+    print('Solving with {}'.format(solver_name))
+    
+    input_q, output_q = queue.Queue(), queue.Queue()
+    threads = [threading.Thread(target=thread_worker, args=(solver_cls, input_q, output_q), daemon=True) for _ in range(max_processes)]
+    for t in threads: t.start()
+    
+    seed_problems = max_processes
+    for p in problems:
+        if p in solution_db: continue
+        
+        print_err('Runner: enqueue', p)
+        input_q.put(p)
+
+        if seed_problems:
+            seed_problems -= 1
+            continue
+        
+        p, (status, result) = output_q.get()
+        print_err('Runner: dequeued', p, status)
+        process_solved(solution_db, p, solver_name, status, result)
+    
+    # tell threads to terminate
+    print_err('Runner: terminating threads')
+    for _ in len(threads):
+        input_q.put(None)
+    for t in threads:
+        t.join()
+
+    while True:
+        try:
+            p, status, result = output_q.get_nowait()
+        except queue.Empty:
+            break
+        print_err('Runner: dequeued', p, status)
+        process_solved(p, solver_name, status, result)
 
 
 def runner(solver_cls, problem_id, solution_pipe):
@@ -154,17 +203,11 @@ def runner(solver_cls, problem_id, solution_pipe):
 def list_problems():
     return sorted(s.stem for s in (get_root() / 'problems').glob('[0-9]' * 5 + '.txt'))
 
+
 def main():
     from production.solver import Solver
     problems = list_problems()
-    limit = 3
-    for p in problems:
-        existing = solution_db.get(p)
-        if existing is not None: continue
-        if STATUS_SOLVED == solve_problem(Solver, p):
-            limit -= 1
-            if limit < 0:
-                break
+    solve_problems(SolutionDb(), Solver, problems, 8)
 
 
 if __name__ == '__main__':

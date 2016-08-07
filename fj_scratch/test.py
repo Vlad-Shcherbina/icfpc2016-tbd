@@ -1,9 +1,11 @@
+#!/bin/env python3
+
 import sys
 from ast import literal_eval
 
-from production.tkrender import SolutionViewer
-from production.ioformats import *
-from production.bbfold import foldgrid
+# from production.tkrender import SolutionViewer
+# from production.ioformats import *
+# from production.bbfold import foldgrid
 
 # sv = SolutionViewer()
 # 
@@ -17,4 +19,6 @@ from production.bbfold import foldgrid
 # #     print(s)
 # #     print('Here we can refine the solution')
 
+text = '\u2019'.encode(encoding='utf_8', errors='backslashreplace')
+print(text)
 print(literal_eval('1, 2'))

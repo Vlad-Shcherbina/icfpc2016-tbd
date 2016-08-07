@@ -4,3 +4,6 @@ htmlcov/
 .pydevproject
 __pycache__/
 .cache/
+/responses/
+/solutions/rejected_*.txt
+/solutions/solution_db.txt
