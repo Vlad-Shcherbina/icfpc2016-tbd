@@ -130,7 +130,7 @@ def submit_solution(problem_id, solution_spec, file=False):
     elif r.status_code == 400:
         raise ServerRejectedError(r.json()['error']) 
     else:
-        pprint((r.status_code, r.text))
+        print(r.status_code, r.text.encode(encoding='utf_8', errors='backslashreplace'))
         raise Exception("Couldn't submit the solution")
 
 

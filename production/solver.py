@@ -4,13 +4,18 @@ import os, sys
 import pprint
 from typing import NamedTuple, Tuple, Dict, List
 import random
+import itertools
 
 from production import cg
 from production.cg import Point
 from production import ioformats
 from production import meshes
+from production import search
 from production import render
 from production import api_wrapper
+
+
+USE_HINTS = False
 
 
 FrontierEntry = NamedTuple('FrontierEntry', [
@@ -57,10 +62,36 @@ class Solver:
                 self.facet_idx_by_edge[e] = facet_idx
 
 
+        self.hints = None
+        if USE_HINTS:
+            try:
+                mesh = meshes.Mesh(p)
+                mesh.precompute_span_templates()
+                borders = search.find_all_borders(mesh)
+                print(len(borders), 'borders')
+                perimeters = list(itertools.islice(search.find_perimeters(mesh, borders), 100))
+                print(len(perimeters), 'perimeters')
+
+                if not perimeters:
+                    raise meshes.TooHardError('no perimeters')
+
+                self.hints = set()
+                for perimeter in perimeters:
+                    for line in perimeter:
+                        self.hints.add(line[0])
+                        self.hints.add(line[-1][::-1])
+            except meshes.TooHardError as e:
+                print('*' * 30, e)
+
+
     def gen_initial_states(self):
         for facet_idx, facet in enumerate(self.facets):
             for align_edge in zip(facet, facet[1:] + facet[:1]):
                 for pt1, pt2 in align_edge, align_edge[::-1]:
+                    if self.hints is not None and (pt1, pt2) not in self.hints:
+                        #print('skip')
+                        continue
+
                     try:
                         t = cg.AffineTransform.align(
                             pt1, pt2,

@@ -103,10 +103,8 @@ class Solver:
                 for i in range(len(q)):
                     q = q[1:] + q[:1]
                     a = mesh.describe_span_template(node, q)
-                    # TODO
-                    #for j in range(len(a)):
-                    #    for k in range(j + 1, len(a) + 1):
-                    #        self.allowed_by_node[node].add(tuple(a[j:k]))
+                    for aa in all_substrings(a):
+                        self.allowed_by_node[node].add(tuple(aa))
                     a = ['cycle'] + a + ['cycle']
                     self.allowed_by_node[node].add(tuple(a))
 
@@ -132,7 +130,9 @@ class Solver:
                          ['border_{}_{}'.format(border_no, i + 1)])
 
                     for a in (a, flip(a)):
-                        self.allowed_by_node[node].add(tuple(a))
+                        for aa in all_substrings(a):
+                            self.allowed_by_node[node].add(tuple(aa))
+                        #self.allowed_by_node[node].add(tuple(a))
 
         for border_no in range(4):
             node = perimeter[border_no][0][0]
@@ -150,9 +150,11 @@ class Solver:
                      ['border_{}_{}'.format(border_no, 0)])
 
                 for a in (a, flip(a)):
-                    self.allowed_by_node[node].add(tuple(a))
+                    for aa in all_substrings(a):
+                        self.allowed_by_node[node].add(tuple(aa))
+                    #self.allowed_by_node[node].add(tuple(a))
 
-        pprint.pprint(self.allowed_by_node)
+        #pprint.pprint(self.allowed_by_node)
         #for node in mesh.node
 
 
@@ -163,7 +165,7 @@ def main():  # pragma: no cover
     #m.debug_print()
     r = m.render()
 
-    m.precompute_span_templates()
+    
     for node in m.nodes:
         s = 0
         for angle in 1, 2, 4:
