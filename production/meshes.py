@@ -1,6 +1,7 @@
 import pprint
 from typing import List, Tuple
 from fractions import Fraction
+import itertools
 
 from production import cg
 from production.cg import Point
@@ -174,6 +175,19 @@ class Mesh:
         self.right_fragment_by_bone = right_fragment_by_bone
         self.fragment_by_id = fragment_by_id
 
+    def describe_node(self, node):
+        return tuple(self.left_fragment_by_bone[bone]
+                     for bone in self.bones_by_node[node])
+
+    def describe_span_template(self, node, span):
+        result = []
+        for dir, f in span:
+            result.append((
+                {1: 'forward', -1: 'back'}[dir],
+                self.left_fragment_by_bone[self.bones_by_node[node][f]]
+            ))
+        return result
+
     def debug_print(self):
         print('**** MESH *******')
         print('bones_by_node')
@@ -198,20 +212,141 @@ class Mesh:
 
         return r
 
+    def get_node_star(self, node):
+        return [bone[1] - bone[0] for bone in self.bones_by_node[node]]
+
+
+def match_angle(start, finish, angle):
+    if angle == 1:
+        return start.dot(finish) == 0 and start.cross(finish) > 0
+    elif angle == 2:
+        return start.dot(finish) < 0 and start.cross(finish) == 0
+    elif angle == 4:
+        return start.dot(finish) > 0 and start.cross(finish) == 0
+    else:
+        assert False, angle
+
 
 def generate_span_templates(star, angle):
-    pass
+    assert len(star) >= 2
+    for num_flips in range(4 + 1):
+        if angle == 4 and num_flips % 2 == 1:
+            continue
+        for flip_locs in itertools.product(range(len(star)), repeat=num_flips):
+            if any(a == b for a, b in zip(flip_locs, flip_locs[1:])):
+                continue
+            for start_loc, start in enumerate(star):
+                for target_loc in range(len(star)):
+
+                    #if (start_loc, flip_locs, target_loc) == (0, (2, 1, 3, 0), 0):
+                    #    print('*' * 10)
+                    #else:
+                    #    continue
+
+                    span = []
+
+                    trajectory = [start]
+                    idx = start_loc
+                    dir = 1
+
+                    ss = list(star)
+                    for flip_loc in flip_locs:
+                        #print('*')
+                        while True:
+                            #span.append(
+                            if dir > 0:
+                                span.append((dir, idx))
+                            idx += dir
+                            idx %= len(star)
+                            if dir < 0:
+                                span.append((dir, idx))
+
+                            trajectory.extend(
+                                intermediate_points(
+                                    trajectory[-1], ss[idx]))
+                            trajectory.append(ss[idx])
+                            #print(trajectory)
+
+                            if idx == flip_loc:
+                                break
+
+                        t = cg.AffineTransform.mirror(Point(0, 0), ss[flip_loc])
+                        ss = list(map(t.transform, ss))
+                        dir = -dir
+
+                    if angle != 4 and idx == target_loc:
+                        continue
+
+                    #print('*')
+                    while idx != target_loc:
+                        if dir > 0:
+                            span.append((dir, idx))
+                        idx += dir
+                        idx %= len(star)
+                        if dir < 0:
+                            span.append((dir, idx))
+
+                        trajectory.extend(
+                            intermediate_points(trajectory[-1], ss[idx]))
+                        trajectory.append(ss[idx])
+                        #print(trajectory)
+
+                    if match_angle(start, ss[target_loc], angle):
+                        trajectory.extend(
+                            intermediate_points(trajectory[-1], trajectory[0]))
+                        #print(trajectory)
+
+                        rev = cg.count_revolutions(Point(0, 0), trajectory)
+                        #print(rev)
+                        assert rev >= 0
+                        if angle == 4:
+                            if rev != 2:
+                                continue
+                        else:
+                            if rev != 1:
+                                continue
+
+                        assert span
+                        assert span[0][0] == 1
+                        #print(' ', start_loc, flip_locs, target_loc, trajectory, span)
+
+                        if angle == 4 and max(span) != span[0]:
+                            continue
+                        yield span
+
+
+def intermediate_points(angle1, angle2):
+    if angle1.cross(angle2) == 0:
+        if angle1.dot(angle2) > 0:
+            # this should not happen but happens for corner case reasons
+            return [
+                Point(-angle1.y, angle1.x),
+                angle1 * -1,
+                Point(angle1.y, -angle1.x)]
+
+        return [Point(-angle1.y, angle1.x)]
+    if angle1.cross(angle2) < 0:
+        return [(angle1 + angle2) * -1]
+    return []
 
 
 def main():  # pragma: no cover
-    p = ioformats.load_problem('00025')
+    p = ioformats.load_problem('00017')
 
     m = Mesh(p)
     m.debug_print()
     m.render().get_img(200).save('mesh.png')
 
     for node in m.nodes:
-        print(node, m.describe_node(node))
+        print()
+        print('node', node, m.describe_node(node))
+        star = m.get_node_star(node)
+        print('star', star)
+
+        for angle in 1, 2, 4:
+            for span in generate_span_templates(star, angle):
+                print(' ', angle, m.describe_span_template(node, span))
+
 
     return
 

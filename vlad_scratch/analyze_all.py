@@ -2,6 +2,7 @@ import glob
 import os
 import re
 import traceback
+import time
 
 from production import ioformats
 from production import render
@@ -43,9 +44,20 @@ def main():
         #print(list(map(len, facets)))
         facets = meshes.keep_real_facets(facets, p)
 
-        meshes.Mesh(p)
+        m = meshes.Mesh(p)
+
+        t = time.time()
+        for node in m.nodes:
+            star = m.get_node_star(node)
+            for angle in 1, 2, 4:
+                list(meshes.generate_span_templates(star, angle))
+                #for span in generate_span_templates(star, angle):
+                #print(' ', angle, m.describe_span_template(node, span))
+        t = time.time() - t
+
+
         #print(list(map(len, facets)))
-        print('{:>6} {:6}'.format(i, len(facets)))
+        print('{:>6} {:6} {:10.2}'.format(i, len(facets), t))
         #print()
 
     print(cnt, 'problems total')
