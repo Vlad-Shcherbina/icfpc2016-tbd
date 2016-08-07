@@ -9,6 +9,13 @@ import itertools
 def get_points(poly):
     return list(itertools.chain.from_iterable(poly.edges))
 
+# def make_flap(poly, i, flap_size, delta_fold_width):
+#     points = get_points(poly)
+#     botl = min(points, key=lambda p: (p.y, p.x))
+#     delta = 0 if i else flap_size
+#     delta += delta_fold_width * i
+#     return Edge(Point(botl.x + delta + flap_size, botl.y),
+#                 Point(botl.x + delta, botl.y + 1))
 def make_flap(poly, i, flap_size, delta_fold_width):
     points = get_points(poly)
     botl = min(points, key=lambda p: (p.y, p.x))
@@ -17,17 +24,33 @@ def make_flap(poly, i, flap_size, delta_fold_width):
     return Edge(Point(botl.x + delta + flap_size, botl.y),
                 Point(botl.x + delta, botl.y + 1))
 
+# def fold_at_45(polys, eps=Fraction(-1, 2)):
 def fold_at_45(polys, eps=Fraction(-1, 2)):
     points = get_points(polys[-1])
     botr = min(points, key=lambda p: (p.y, -p.x))
     return fold(polys, Edge(Point(botr.x - 1, botr.y + eps),
                             Point(botr.x, botr.y + 1 + eps)))
 
-def fold_at_3_4(polys, eps=Fraction(-1, 2)):
+# def fold_at_3_4(polys, eps=Fraction(-1, 2)):
+def fold_at_3_4(polys, eps=Fraction(-9, 10)):
     points = get_points(polys[-1])
     botr = min(points, key=lambda p: (p.y, -p.x))
     return fold(polys, Edge(Point(botr.x - 1, botr.y + eps),
                             Point(botr.x + 3, botr.y + 1 + eps + 4)))
+
+def fold_at_4_3(polys, eps=Fraction(-1, 2)):
+    points = get_points(polys[-1])
+    botr = min(points, key=lambda p: (p.y, -p.x))
+    return fold(polys, Edge(Point(botr.x - 1, botr.y + eps),
+                            Point(botr.x + 4, botr.y + 1 + eps + 3)))
+
+def fold_180(polys, flap_size, eps=Fraction(-1, 2)):
+    # points = get_points(polys[-1])
+    # botr = min(points, key=lambda p: (p.y, -p.x))
+    # return fold(polys, Edge(Point(botr.x - 1, botr.y + eps),
+    #                         Point(botr.x + 4, botr.y + 1 + eps + 3)))
+    return fold(polys, Edge(Point(1 - Fraction(flap_size), Fraction(0)),
+                            Point(1 - Fraction(flap_size), Fraction(1))))
 
 # def fold_at_3_4_2(polys):
 #     # eps = Fraction(1, 50) # tweek me for 3/4 rot
@@ -40,7 +63,10 @@ def fold_at_45_2(polys):
     # eps = Fraction(1, 50) # 1st submission
     # eps = Fraction(1, 5) # TWEEK HERE
     # eps = Fraction(97, 800) # just touch
-    eps = Fraction(96, 800) # TWEEK HERE
+    # eps = Fraction(96, 800) # just overlap
+    # eps = Fraction(4, 26) # TWEEK HERE
+    # eps = Fraction(4, 34) # TWEEK HERE
+    eps = Fraction(1, 5) # TWEEK HERE
     return fold(polys, Edge(Point(Fraction(1), Fraction(1, 2) + eps),
                             Point(Fraction(3, 2), Fraction(0) + eps)))
 
@@ -53,9 +79,11 @@ def quadratic_skeleton(n):
         e = make_flap(polys[-1], i, flap_size, delta_fold_width)
         polys = fold(polys, e)
     # polys = fold_at_45(polys)
-    polys = fold_at_3_4(polys)
+    # polys = fold_at_3_4(polys)
+    polys = fold_at_4_3(polys)
+    polys = fold_180(polys, flap_size)
     # polys = fold_at_3_4_2(polys)
-    polys = fold_at_45_2(polys)
+    # polys = fold_at_45_2(polys)
     return polys
 
 if __name__ == '__main__':
