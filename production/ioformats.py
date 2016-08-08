@@ -69,6 +69,9 @@ def get_root() -> Path:
 def get_problem_file(name: str) -> Path:
     return get_root() / 'problems' / '{}.txt'.format(name)
 
+def get_solution_file(name: str) -> Path:
+    return get_root() / 'solutions' / 'solved_{}.txt'.format(name)
+
 
 def load_problem(name: str) -> Problem:
     with get_problem_file(name).open('r') as f:

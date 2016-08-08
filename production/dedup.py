@@ -1,9 +1,8 @@
 import os
 import json
 from pprint import pprint
-from production.ioformats import get_problem_file
+from production.ioformats import get_problem_file, get_solution_file
 
-from production.solution_runner import get_solution_file
 
 map_hash_to_ids, map_id_to_hash = None, None 
 def load_mapping():
